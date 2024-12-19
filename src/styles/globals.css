@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* 
+.str-chat {
+  --str-chat__primary-color: #005fff;
+  --str-chat__background-color: #fff;
+  --str-chat__secondary-background-color: rgba(255, 255, 255, 0.9);
+  --str-chat__thread-background-color: var(--str-chat__background-color);
+  --str-chat__notification-list-background-color: var(
+    --str-chat__background-color
+  );
+  --str-chat__message-list-background-color: var(--str-chat__background-color);
+
+  --messaging__header-shadow: 0 7px 9px rgba(0, 0, 0, 0.03),
+    0 1px 0 rgba(0, 0, 0, 0.03);
+
+  .avatar-subgroup.avatar-subgroup--split {
+    --str-chat__avatar-size: 20px;
+  }
+
+  .str-chat__message {
+    --str-chat__avatar-size: 32px;
+  }
+
+  --str-chat__avatar-size: 40px;
+}
+
+.str-chat.str-chat__theme-dark {
+  --str-chat__background-color: #282a2d;
+  --str-chat__secondary-background-color: #212326;
+  --str-chat__primary-surface-color: #18191b;
+  --str-chat__secondary-surface-color: #343434;
+} */
+
+.icon-phone {
+  color: gray;
+}
+
+.icon-phone-active {
+  color: white;
+}
+
+.search-icon {
+  color: #172b6d;
+}
+
+@media (min-width: 640px) {
+  .search-icon-active {
+    color: white;
+  }
+}
+
+.outerdivclass:hover .search-icon .icon-phone {
+  color: white;
+}
+
+.shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadowmobile {
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.question-icon {
+  color: white;
+  font-weight: bold;
+}
+
+.shadowprofile {
+  box-shadow: 0px 4px 54px 0px rgba(0, 0, 0, 0.15);
+}
+
+.step-item {
+  @apply relative flex flex-col justify-center items-center w-24 sm:w-36;
+}
+.step-item:not(:first-child):before {
+  @apply content-[''] bg-[#181849] absolute w-full h-[1px] right-2/4 top-1.5 -translate-y-2/4;
+}
+.step {
+  @apply w-3 h-3 flex items-center justify-center z-10 relative bg-white border-2 border-[#181849] rounded-full font-semibold text-white;
+}
+.active .step {
+  @apply bg-[#181849];
+}
+.complete .step {
+  @apply bg-[#181849];
+}
+
+.landingpagebg {
+  background: var(
+    --Medium-Blue-Gradient,
+    linear-gradient(249deg, #577eb8 4.71%, #3060a8 113.23%)
+  );
+}
+
+.input-range__slider {
+  background: #fff;
+  border: 1px solid #ccc;
+}
+
+.basic:before {
+  content: "";
+  display: block;
+  height: 28px;
+  width: 28px;
+  -webkit-animation: spin 0.5s infinite linear;
+  animation: spin 0.5s infinite linear;
+  border: 3px #577eb8 solid;
+  border-left-color: white;
+  border-radius: 100%;
+}
+
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.basic-small:before {
+  content: "";
+  display: block;
+  height: 14px;
+  width: 14px;
+  -webkit-animation: spin 0.5s infinite linear;
+  animation: spin 0.5s infinite linear;
+  border: 2px #6893d4 solid;
+  border-left-color: white;
+  border-radius: 100%;
+}
+
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.basic-large:before {
+  content: "";
+  display: block;
+  height: 40px;
+  width: 40px;
+  -webkit-animation: spin 0.5s infinite linear;
+  animation: spin 0.5s infinite linear;
+  border: 3px white solid;
+  border-left-color: #577eb8;
+  border-radius: 100%;
+}
+
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
