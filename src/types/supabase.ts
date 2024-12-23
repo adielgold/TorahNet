@@ -54,6 +54,7 @@ export type Database = {
           id: number
           payment_intent_id: string | null
           payout_due_date: string | null
+          refund_id: string | null
           session_id: string | null
           status: string | null
           student_id: string | null
@@ -66,6 +67,7 @@ export type Database = {
           id?: number
           payment_intent_id?: string | null
           payout_due_date?: string | null
+          refund_id?: string | null
           session_id?: string | null
           status?: string | null
           student_id?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           id?: number
           payment_intent_id?: string | null
           payout_due_date?: string | null
+          refund_id?: string | null
           session_id?: string | null
           status?: string | null
           student_id?: string | null
@@ -240,20 +243,47 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawals: {
+        Row: {
+          amount: number | null
+          created_at: string
+          id: number
+          status: string | null
+          teacher_id: string | null
+          transfer_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          id?: number
+          status?: string | null
+          teacher_id?: string | null
+          transfer_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          id?: number
+          status?: string | null
+          teacher_id?: string | null
+          transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_teacher_review_stats: {
-        Args: {
-          teacher_id_input: string
-        }
-        Returns: {
-          review_count: number
-          average_score: number
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
