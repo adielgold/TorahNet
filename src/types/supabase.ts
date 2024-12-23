@@ -283,7 +283,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_teacher_review_stats: {
+        Args: {
+          teacher_id_input: string
+        }
+        Returns: {
+          review_count: number
+          average_score: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
