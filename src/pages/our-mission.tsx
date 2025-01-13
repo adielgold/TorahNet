@@ -139,13 +139,15 @@ export default function OurMission() {
                 Inspiring personal and spiritual growth through Torah learning
                 around the world.
               </p>
+              <a   href="#how-it-works" className="no-underline">
               <Button
                 size="lg"
                 className="bg-blue-700 text-white hover:bg-blue-100"
-                href="#how-it-works"
+              
               >
                 Show me how it works
               </Button>
+              </a>
             </div>
           </motion.div>
         </section>
