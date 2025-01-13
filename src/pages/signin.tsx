@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 interface FormValues {
   email: string;
@@ -93,12 +94,19 @@ const Signin: React.FC = () => {
   };
 
   return (
-    <div className="container relative  h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative grid h-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-primary-blue p-10 text-white lg:flex">
         <div className="absolute inset-0 bg-primary-blue" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           {/* <Icons.logo className="mr-2 h-8 w-8" /> */}
-          Religious Learning App
+          <Link href={"www.torah-net.com"}>
+            <Image
+              src="/logo-white.png"
+              alt="TorahNet Logo"
+              width={70}
+              height={70}
+            />
+          </Link>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
@@ -111,19 +119,19 @@ const Signin: React.FC = () => {
         </div>
         <div className="relative z-20 mt-10 flex items-center justify-between text-blue-200">
           <div className="flex flex-col items-center">
-            <BookOpen className="h-10 w-10 mb-2" />
+            <BookOpen className="mb-2 h-10 w-10" />
             <span>Learn</span>
           </div>
           <div className="flex flex-col items-center">
-            <PenTool className="h-10 w-10 mb-2" />
+            <PenTool className="mb-2 h-10 w-10" />
             <span>Practice</span>
           </div>
           <div className="flex flex-col items-center">
-            <Lightbulb className="h-10 w-10 mb-2" />
+            <Lightbulb className="mb-2 h-10 w-10" />
             <span>Discover</span>
           </div>
           <div className="flex flex-col items-center">
-            <GraduationCap className="h-10 w-10 mb-2" />
+            <GraduationCap className="mb-2 h-10 w-10" />
             <span>Achieve</span>
           </div>
         </div>
@@ -183,7 +191,7 @@ const Signin: React.FC = () => {
                 className="bg-primary-blue hover:bg-blue-700"
               >
                 {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In to Learn
+                Sign In
               </Button>
             </div>
           </form>
@@ -192,7 +200,7 @@ const Signin: React.FC = () => {
               href="/getStarted"
               className="underline underline-offset-4 hover:text-blue-800"
             >
-              New to Religious App? Sign Up
+              New to Torah Net? Sign Up!
             </Link>
           </p>
         </div>
