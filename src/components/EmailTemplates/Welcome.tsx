@@ -115,7 +115,7 @@ export const WelcomeEmail = ({ name }: { name: string }) => {
                   Jewish wisdom.
                 </Text>
 
-                <Text className="text-base">Here's how to get started:</Text>
+                <Text className="text-base">Here&apos;s how to get started:</Text>
               </Row>
             </Section>
 
