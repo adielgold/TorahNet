@@ -1,18 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Hamburger, Navbar2 } from "@/components";
-import { ArrowIconBlue } from "@/Icons";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useState, useRef } from "react";
 import Footer from "@/components/Footer/footer";
 import FAQ from "@/components/FAQ/faq";
 
-export default function Home() {
-  const handleHamburgerClick = () => {
-    console.log("Hamburger clicked!");
-  };
+export default function OurMission() {
   return (
-    <div className="min-h-screen overflow-auto bg-gradient-to-br from-primary-blue to-blue-700 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-primary-blue to-blue-700 text-white">
       <header className="container mx-auto flex items-center justify-between px-4 py-6">
         <Link href={"www.torah-net.com"}>
           <Image
@@ -143,14 +139,13 @@ export default function Home() {
                 Inspiring personal and spiritual growth through Torah learning
                 around the world.
               </p>
-              <Link href="#how-it-works">
-                <Button
-                  size="lg"
-                  className="bg-blue-700 text-white hover:bg-blue-100"
-                >
-                  Show me how it works
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                className="bg-blue-700 text-white hover:bg-blue-100"
+                href="#how-it-works"
+              >
+                Show me how it works
+              </Button>
             </div>
           </motion.div>
         </section>

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -62,12 +66,14 @@
 }
 
 .shadow {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .shadowmobile {
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 -4px 6px -1px rgba(0, 0, 0, 0.1),
     0 -2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -81,13 +87,13 @@
 }
 
 .step-item {
-  @apply relative flex flex-col justify-center items-center w-24 sm:w-36;
+  @apply relative flex w-24 flex-col items-center justify-center sm:w-36;
 }
 .step-item:not(:first-child):before {
-  @apply content-[''] bg-[#181849] absolute w-full h-[1px] right-2/4 top-1.5 -translate-y-2/4;
+  @apply absolute right-2/4 top-1.5 h-[1px] w-full -translate-y-2/4 bg-[#181849] content-[''];
 }
 .step {
-  @apply w-3 h-3 flex items-center justify-center z-10 relative bg-white border-2 border-[#181849] rounded-full font-semibold text-white;
+  @apply relative z-10 flex h-3 w-3 items-center justify-center rounded-full border-2 border-[#181849] bg-white font-semibold text-white;
 }
 .active .step {
   @apply bg-[#181849];
