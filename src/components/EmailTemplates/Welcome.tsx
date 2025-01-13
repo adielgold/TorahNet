@@ -16,19 +16,12 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface NetlifyWelcomeEmailProps {
-  steps?: {
-    id: number;
-    Description: React.ReactNode;
-  }[];
-  links?: string[];
-}
 
 const baseUrl = process.env.VERCEL_URL
   ? `http://${process.env.VERCEL_URL}`
   : "";
 
-const PropDefaults: NetlifyWelcomeEmailProps = {
+const PropDefaults = {
   steps: [
     {
       id: 1,
@@ -57,25 +50,42 @@ const PropDefaults: NetlifyWelcomeEmailProps = {
         </li>
       ),
     },
-    // {
-    //   id: 4,
-    //   Description: (
-    //     <li className="mb-20" key={4}>
-    //       <strong>Set up a custom domain.</strong> You can register a new domain
-    //       and buy it through Netlify or assign a domain you already own to your
-    //       site. <Link>Add a custom domain</Link>.
-    //     </li>
-    //   ),
-    // },
+   
   ],
-  links: ["Visit the forums", "Read the docs", "Contact an expert"],
+  stepsTeacher: [
+    {
+      id: 1,
+      Description: (
+        <li className="mb-20" key={1}>
+          <strong>Log in to your account</strong> to explore the platform and familiarize yourself with its features.
+        </li>
+      ),
+    },
+    {
+      id: 2,
+      Description: (
+        <li className="mb-20" key={2}>
+          <strong>Set up your profile</strong> in the settings section. Add your teaching subjects, rates, and availability, and create a Stripe account to receive payments securely.
+        </li>
+      ),
+    },
+    {
+      id: 3,
+      Description: (
+        <li className="mb-20" key={3}>
+          <strong>Begin teaching!</strong> Use our intuitive tools to engage with your students and share your expertise seamlessly.
+        </li>
+      ),
+    },
+   
+  ],
 };
 
-export const WelcomeEmail = ({ name }: { name: string }) => {
+export const WelcomeEmail = ({ name,role }: { name: string,role:"student" | "teacher" }) => {
   return (
     <Html>
       <Head />
-      <Preview>Welcome to TorahNet – Let’s Begin Your Journey!</Preview>
+      <Preview>{role === "student" ? "Welcome to TorahNet – Let’s Begin Your Journey!" : "Welcome to TorahNet – Let’s Start Teaching!"} </Preview>
       <Tailwind
         config={{
           theme: {
@@ -103,42 +113,41 @@ export const WelcomeEmail = ({ name }: { name: string }) => {
           />
           <Container className="bg-white p-45">
             <Heading className="text-center my-0 leading-8">
-              Welcome to TorahNet – Let’s Begin Your Journey!
+              {role === "student" ? "Welcome to TorahNet – Let’s Begin Your Journey!" : "Welcome to TorahNet – Let’s Start Teaching!"} 
             </Heading>
 
             <Section>
               <Row>
                 <Text className="text-base font-bold mt-8">Dear {name}</Text>
                 <Text className="text-base">
-                  Welcome to *TorahNet*! We’re excited to have you join our
+                  {role === "student" ? ` Welcome to *TorahNet*! We’re excited to have you join our
                   vibrant community of learners eager to explore the depths of
-                  Jewish wisdom.
+                  Jewish wisdom.` : `Welcome to *TorahNet*! We’re honored to have you join our dedicated community of educators sharing Jewish wisdom with eager learners around the world.  `}
+                 
                 </Text>
 
-                <Text className="text-base">Here&apos;s how to get started:</Text>
+                <Text className="text-base">{role === "student" ? `Here's how to get started:` : `Here’s how to get started as a teacher: `}</Text>
               </Row>
             </Section>
 
             <ol className="-ml-20">
-              {PropDefaults.steps?.map(({ Description }) => Description)}
+              {role === "student" ? PropDefaults.steps?.map(({ Description }) => Description) : PropDefaults.stepsTeacher?.map(({ Description }) => Description)}
             </ol>
 
             <Section>
               <Row>
                 <Text className="text-base">
-                  If you have any questions or need assistance, feel free to
-                  email us at{" "}
+                 {role === "student" ? ` If you have any questions or need assistance, feel free to
+                  email us at` : 'If you have any questions or need help setting up your account, don’t hesitate to contact us at'}{" "}
                   <Link href="mailto:admin@torah-net.com">
                     admin@torah-net.com
                   </Link>
-                  . We’re here to ensure your experience is seamless and
-                  enriching.
+                  . {role === "student" ? `We’re here to ensure your experience is seamless and enriching.` : `We’re here to support you every step of the way.`}
                 </Text>
 
                 <Text className="text-base">
-                  Thank you for choosing TorahNet. We’re honored to be part of
-                  your journey and look forward to supporting you every step of
-                  the way.{" "}
+                  {role === "student" ? `Thank you for choosing TorahNet. We’re honored to be part of your journey and look forward to supporting you every step of the way.` : "Thank you for being part of TorahNet. Together, we’re making Jewish wisdom more accessible and impactful than ever."}
+                  {" "}
                 </Text>
               </Row>
             </Section>

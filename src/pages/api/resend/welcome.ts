@@ -25,7 +25,7 @@ export default async function handler(
         from: "admin@torah-net.com",
         to: data?.user?.email as string,
         subject: "Welcome to TorahNet",
-        react: WelcomeEmail({ name: userData?.name as string }),
+        react: WelcomeEmail({ name: userData?.name as string,role:userData?.role }),
       });
       res.status(200).json({ message: "Email sent" });
     } catch (error: any) {
