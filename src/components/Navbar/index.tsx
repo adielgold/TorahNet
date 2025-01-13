@@ -22,6 +22,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useUserStore } from "@/stores/userStore";
 import { StreamChat } from "stream-chat";
 import MessagingSidebar from "../Chat/MessagingSidebar";
+import Image from "next/image";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/profile/dashboard" },
@@ -96,11 +97,17 @@ export default function NavbarWrapper({
         <nav className="mx-auto flex items-center space-x-3 lg:space-x-3 ">
           <Link
             href="/"
-            className="flex items-center space-x-2  absolute left-[58px] md:left-4 md:top-5 top-[21px]"
+            className="flex items-center space-x-2  absolute left-[58px] md:left-4 md:top-3 top-[21px]"
           >
-            <BookOpen className="h-6 w-6 text-darkblueui" />
-            <span className="font-bold hidden sm:inline-block text-darkblueui">
-              Religious Teaching App
+            <Image
+              src={"/static/logo.jpg"}
+              width={60}
+              height={60}
+              alt="Logo"
+              className="h-10 w-10 "
+            />
+            <span className="font-bold text-lg hidden sm:inline-block text-darkblueui">
+              Torah Net
             </span>
           </Link>
           <div className="flex-1" />
@@ -160,7 +167,7 @@ export default function NavbarWrapper({
       <div className="flex-1 flex">
         {pathname === "/chat" ? (
           <MessagingSidebar />
-        ) : (
+        ) : pathname?.includes("/search") ? null : (
           <aside className="w-64 hidden lg:block bg-[#1e1e4a] text-white">
             <nav className="flex flex-col gap-1 p-4">
               <div className="text-lg font-semibold mb-4">Profile</div>

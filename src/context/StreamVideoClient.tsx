@@ -41,6 +41,7 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
           toast({
             title: "Error getting session",
             description: "Error getting session",
+            variant: "destructive",
           });
           return;
         }

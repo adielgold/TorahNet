@@ -20,7 +20,7 @@ const SessionPlan: React.FC<SessionPlanProps> = ({
   return (
     <div
       className={
-        fromHistory ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"
+        fromHistory ? "grid gap-4 md:grid-cols-2 lg:grid-cols-2" : "space-y-4"
       }
     >
       {sessions &&

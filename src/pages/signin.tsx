@@ -98,7 +98,7 @@ const Signin: React.FC = () => {
         <div className="absolute inset-0 bg-primary-blue" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           {/* <Icons.logo className="mr-2 h-8 w-8" /> */}
-          Religious Learning App
+          Torah Net
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
@@ -192,7 +192,7 @@ const Signin: React.FC = () => {
               href="/getStarted"
               className="underline underline-offset-4 hover:text-blue-800"
             >
-              New to Religious App? Sign Up
+              New to Torah Net ? Sign Up
             </Link>
           </p>
         </div>

@@ -23,6 +23,12 @@ export default async function handler(
 
     const account = await stripe.accounts.create({
       type: "express",
+      country: "LT",
+      email: userData?.email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
     });
 
     const accountLink = await stripe.accountLinks.create({

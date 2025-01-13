@@ -76,14 +76,14 @@ const MessagingChannelHeader: React.FC = () => {
           user?.role === "student"
             ? user?.id
             : members?.length > 0
-            ? members?.[0]?.user?.id
-            : null,
+              ? members?.[0]?.user?.id
+              : null,
         teacher_id:
           user?.role === "teacher"
             ? user?.id
             : members?.length > 0
-            ? members?.[0]?.user?.id
-            : null,
+              ? members?.[0]?.user?.id
+              : null,
         durationInMins: 60,
         scheduledAt: data.dateTime.toISOString(),
         startsAt: startsAt,
@@ -165,6 +165,7 @@ const MessagingChannelHeader: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to fetch existing session",
+        variant: "destructive",
       });
       return;
     }
@@ -221,7 +222,7 @@ const MessagingChannelHeader: React.FC = () => {
                 View Meeting
               </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-gradient-to-br from-blue-50 to-indigo-50">
+            <DialogContent className="sm:max-w-md bg-white">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-center text-indigo-900">
                   Your Session Details
@@ -238,7 +239,7 @@ const MessagingChannelHeader: React.FC = () => {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-6 h-6 text-indigo-600" />
+                        <Calendar className="w-6 h-6 text-darkblueui" />
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
@@ -248,18 +249,21 @@ const MessagingChannelHeader: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Clock className="w-6 h-6 text-indigo-600" />
+                        <Clock className="w-6 h-6 text-darkblueui" />
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
                                 existingSession?.scheduledAt!
-                              ).toLocaleTimeString()
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
                             : ""}
                         </span>
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-primary-blue hover:bg-indigo-700 text-white"
+                      className="w-full bg-darkblueui  text-white"
                       onClick={() => {
                         // Add calendar download logic here
                         console.log("Downloading calendar...");

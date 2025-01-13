@@ -15,7 +15,7 @@ const GetStarted = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-2xl font-bold">ReligiousTeach</h1>
+          <h1 className="text-2xl font-bold">Torah Net</h1>
         </motion.div>
         <nav className="hidden md:flex space-x-6">
           <Link href="#mission">Our Mission</Link>

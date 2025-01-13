@@ -93,8 +93,8 @@ const SessionPlanCard = ({
       toast({
         title: "Rescheduling Session Failed",
         description: "Failed to Reschedule the session. Please try again later",
+        variant: "destructive",
       });
-      console.log(error, "Error");
     }
 
     // const { data: sessionData, error } = await supabase
@@ -162,10 +162,7 @@ const SessionPlanCard = ({
                   {title}
                 </p>
                 <p className="text-sm text-gray-500 truncate">
-                  {formattedStartDate}
-                </p>
-                <p className="text-sm text-gray-500 truncate">
-                  {formattedEndDate}
+                  {formattedStartDate} - {formattedEndDate}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-3">
@@ -175,10 +172,10 @@ const SessionPlanCard = ({
                     status === "cancelled"
                       ? "bg-red-500"
                       : status === "scheduled"
-                      ? "bg-primary-blue"
-                      : status === "payment_pending"
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
+                        ? "bg-primary-blue"
+                        : status === "payment_pending"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
                   }
                 >
                   {status?.replace("_", " ")}
@@ -189,7 +186,7 @@ const SessionPlanCard = ({
                     className="bg-[#1e1e4a] text-white hover:bg-[#2a2a5a] "
                   >
                     <User className="h-4 w-4 mr-2" />
-                    <span>View Profile</span>
+                    <span>Go to Chat</span>
                   </Button>
                 </Link>
               </div>

@@ -184,8 +184,8 @@ const SessionHistory: React.FC = () => {
 
       let query = supabase.from("sessions").select(`
                 *,
-                student:users!sessions_student_id_fkey(id, name, email,image_url),  
-                teacher:users!sessions_teacher_id_fkey(id, name, email,image_url) 
+                student:users!sessions_student_id_fkey(id, name, email, image_url),  
+                teacher:users!sessions_teacher_id_fkey(id, name, email, image_url) 
             `);
 
       if (user?.role === "student") {
@@ -219,6 +219,7 @@ const SessionHistory: React.FC = () => {
       toast({
         title: "Error fetching sessions",
         description: "Please try again later",
+        variant: "destructive",
       });
       setSessionsLoading(false);
 

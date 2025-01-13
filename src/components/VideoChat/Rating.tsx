@@ -79,6 +79,7 @@ const Rating = () => {
         toast({
           title: "Error",
           description: "Error getting teacher Info",
+          variant: "destructive",
         });
         return;
       }
@@ -102,6 +103,7 @@ const Rating = () => {
       toast({
         title: "Error",
         description: "Error submitting feedback",
+        variant: "destructive",
       });
       setLoading(false);
       return;

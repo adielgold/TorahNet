@@ -83,6 +83,7 @@ const VideoSession = () => {
       toast({
         title: "Error",
         description: "Failed to end session. Please try again later",
+        variant: "destructive",
       });
     }
   };

@@ -54,7 +54,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ token }) => {
   const { user } = useUserStore();
 
   const client = useCreateChatClient({
-    apiKey: "qrkwzqcp9jj8",
+    apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY!,
     userData: {
       id: user?.id as string,
       name: user?.name as string,

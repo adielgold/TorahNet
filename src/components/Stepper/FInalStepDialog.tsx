@@ -105,6 +105,11 @@ const FinalStepDialog: React.FC<StepProps> = ({
             ...usersData,
             token: streamData?.token,
           });
+
+          await axios.post("/api/resend/welcome").then(() => {
+            console.log("Email sent");
+          });
+
           router.replace("/profile/dashboard");
         } catch (err) {
           console.log(err, "Error");

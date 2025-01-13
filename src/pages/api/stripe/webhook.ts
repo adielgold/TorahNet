@@ -64,6 +64,8 @@ export default async function handler(
       case "account.updated":
         const account = event.data.object;
 
+        console.log(account, "Account");
+
         if (
           account.charges_enabled &&
           account?.requirements?.currently_due?.length === 0 &&
@@ -77,8 +79,6 @@ export default async function handler(
               stripe_account_id: account.id,
             })
             .eq("stripe_account_id", account.id);
-
-          console.log(`Teacher ${account.id} completed onboarding.`);
         } else if (!account.charges_enabled) {
           await supabase
             .from("payment_details")

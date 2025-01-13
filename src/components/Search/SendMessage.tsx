@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import axios from "axios";
 
 interface FormValues {
   message: string;
@@ -121,6 +122,11 @@ const SendMessage = ({
         id: user?.id!,
       },
       show_in_channel: true,
+    });
+
+    await axios.post("/api/resend/messagesent", {
+      id,
+      message: data.message,
     });
 
     handleClose();
