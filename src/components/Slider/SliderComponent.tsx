@@ -7,17 +7,24 @@ function valuetext(value: number) {
   return `${value}°C`;
 }
 
-const minDistance = 10;
 
 interface SliderComponentProps {
   filterPrice: string;
   setFilterPrice: React.Dispatch<React.SetStateAction<string>>;
+  max: number;
+  type?: string;
 }
 
 export default function SliderComponent({
   filterPrice,
   setFilterPrice,
+  max,
+  type
 }: SliderComponentProps) {
+
+const minDistance = type === "price" ? 10 : 1;
+
+
   const filterPriceArray = filterPrice?.split("-");
 
   const [value1, setValue1] = React.useState<number[]>(
@@ -25,7 +32,7 @@ export default function SliderComponent({
       !isNaN(+filterPriceArray[0]) &&
       !isNaN(+filterPriceArray[1])
       ? [+filterPriceArray[0], +filterPriceArray[1]]
-      : [0, 25]
+      : type === "price" ? [0, 25] : [0, 5]
   );
 
   const handleChange1 = (
@@ -62,6 +69,7 @@ export default function SliderComponent({
         onChange={handleChange1}
         valueLabelDisplay="on"
         getAriaValueText={valuetext}
+        max={max}
         disableSwap
         sx={{
           marginLeft: 2,

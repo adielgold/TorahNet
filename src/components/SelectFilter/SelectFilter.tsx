@@ -21,36 +21,6 @@ export function SelectFilter({
 }: SelectFilterProps) {
   return (
     <div className="flex">
-      {/* <div className="flex">
-        <Select>
-          <SelectTrigger className="w-20 h-6 sm:w-[100px] sm:h-[30px] text-xs sm:text-base border border-[#8eaedf] bg-[#d7e3f4] bg-opacity-70 outline-none text-darkblueui ">
-            <SelectValue placeholder="Topics" className="" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Topics</SelectLabel>
-              <SelectItem value="1">Lorem ipsum dolor </SelectItem>
-              <SelectItem value="2">Lorem ipsum dolor </SelectItem>
-              <SelectItem value="3">Lorem ipsum dolor </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div> */}
-      {/* <div className="flex ml-2">
-        <Select>
-          <SelectTrigger className="w-20 h-6 sm:w-[100px] sm:h-[30px] text-xs sm:text-base border border-[#8eaedf] bg-[#d7e3f4] bg-opacity-70 text-darkblueui outline-none">
-            <SelectValue placeholder="Rating" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Rating</SelectLabel>
-              <SelectItem value="1"></SelectItem>
-              <SelectItem value="2">Lorem ipsum dolor </SelectItem>
-              <SelectItem value="3">Lorem ipsum dolor </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div> */}
       <div className="flex w-full">
         <Select
           onValueChange={(val) => {

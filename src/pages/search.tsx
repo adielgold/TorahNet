@@ -11,18 +11,22 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon } from "lucide-react";
+import { SelectFilterRating } from "@/components/SelectFilter/SelectFilterRating";
 
 interface SearchTeacherProps {
   search: string;
   selectedTopics: string[];
   startPrice: string;
   endPrice: string;
+  startRating: string;
+  endRating: string;
 }
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [filterPrice, setFilterPrice] = useState("");
+    const [filterRating, setFilterRating] = useState("");
 
   const { setUsers, setLoading } = useSearchUserStore();
 
@@ -52,39 +56,22 @@ const Search = () => {
     endPrice,
     selectedTopics,
     startPrice,
+    startRating,
+    endRating,
   }: SearchTeacherProps) => {
-    let query = supabase
-      .from("users")
-      .select(
-        `
-      *,
-      payment_details!inner(hourly_rate)
-    `
-      )
-      .ilike("name", `%${search}%`)
-      .eq("role", "teacher");
+   
 
-    if (
-      selectedTopics &&
-      selectedTopics?.filter((val) => val !== "").length > 0
-    ) {
-      query = query.or(
-        selectedTopics.map((topic) => `topics.cs.{${topic}}`).join(",")
-      );
-    }
+     const { data, error } = await supabase.rpc("search_teachers", {
+    search: search || undefined,
+    selected_topics: selectedTopics?.length ? selectedTopics : undefined,
+    start_price: +startPrice || undefined,
+    end_price: +endPrice || undefined,
+    start_rating: +startRating || undefined,
+    end_rating: +endRating || undefined,
+  });
 
-    if (startPrice !== "" && endPrice !== "") {
-      query = query
-        .gte("payment_details.hourly_rate", startPrice)
-        .lte("payment_details.hourly_rate", endPrice);
-    }
-
-    const { data, error } = await query;
-
-    console.log(data, "Data");
-
+  
     if (error) {
-      console.log(error, "Error");
       toast.error("Error fetching data");
       setLoading(false);
       return null;
@@ -92,8 +79,13 @@ const Search = () => {
 
     setLoading(false);
 
-    return data;
+
+  return data;
+
+    
   };
+
+  console.log(filterRating, "Filter Rating");
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -101,12 +93,16 @@ const Search = () => {
     const search = searchTerm.trim();
     const startPrice = filterPrice.split("-")[0];
     const endPrice = filterPrice.split("-")[1];
+        const startRating = filterRating.split("-")[0];
+    const endRating = filterRating.split("-")[1];
     router.push(
       {
         query: {
           searchTerm: search,
           starting_price: startPrice,
           ending_price: endPrice,
+              starting_rating: startRating,
+          ending_rating: endRating,
           selectedTopics: selectedTopics?.join(","),
         },
       },
@@ -121,7 +117,11 @@ const Search = () => {
       selectedTopics,
       startPrice,
       endPrice,
+      startRating,
+      endRating,
     });
+
+    // 
 
     setUsers(data);
   };
@@ -140,6 +140,11 @@ const Search = () => {
         router.query?.ending_price || ""
       }`
     );
+     setFilterRating(
+      `${router.query?.starting_rating || ""}-${
+        router.query?.ending_rating || ""
+      }`
+    );
     setSelectedTopics(
       ((router.query?.selectedTopics as string) || "").split(",")
     );
@@ -152,6 +157,8 @@ const Search = () => {
           (router.query?.selectedTopics as string)?.split(",") || [],
         startPrice: router.query?.starting_price as string,
         endPrice: router.query?.ending_price as string,
+         startRating: router.query?.starting_rating as string,
+        endRating: router.query?.ending_rating as string,
       });
       setUsers(data);
     })();
@@ -165,12 +172,15 @@ const Search = () => {
           searchTerm,
           starting_price: filterPrice.split("-")[0],
           ending_price: filterPrice.split("-")[1],
+                    starting_rating: filterRating.split("-")[0],
+          ending_rating: filterRating.split("-")[1],
         },
       },
       undefined,
       { shallow: true }
     );
-  }, [filterPrice, searchTerm]);
+  }, [filterPrice, searchTerm, filterRating]);
+
 
   return (
     <LayoutWrapper>
@@ -201,7 +211,7 @@ const Search = () => {
             >
               <Input
                 type="text"
-                placeholder="What would you like to learn today?"
+                placeholder="Search The Teachers By Name..."
                 className="w-full pl-12 pr-4 py-6 text-lg rounded-full border-2 border-[#1e1e4a] focus:ring-2 focus:ring-primary-blue focus:border-transparent transition-all duration-300"
                 value={searchTerm}
                 onChange={(e) => handleInputChange(e.target.value)}
@@ -220,34 +230,14 @@ const Search = () => {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="flex flex-wrap gap-6 justify-center items-end"
             >
-              <div className="w-full sm:w-auto space-y-2">
-                {/* <Label
-                  htmlFor="price-range"
-                  className="text-sm font-medium text-gray-700 block"
-                >
-                  Price Range
-                </Label>
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg font-semibold text-[#1e1e4a]">
-                    ${priceRange[0]}
-                  </span>
-                  <Slider
-                    id="price-range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    className="w-[200px]"
-                  />
-                  <span className="text-lg font-semibold text-[#1e1e4a]">
-                    ${priceRange[1]}
-                  </span>
-                </div> */}
-
+              <div className="w-full sm:w-auto  flex gap-4">
                 <SelectFilter
                   filterPrice={filterPrice}
                   setFilterPrice={setFilterPrice}
+                />
+                 <SelectFilterRating
+                  filterRating={filterRating}
+                  setFilterRating={setFilterRating}
                 />
               </div>
             </motion.div>
@@ -302,74 +292,12 @@ const Search = () => {
           setFilterPrice={setFilterPrice}
           setSelectedTopics={setSelectedTopics}
           handleInputChange={handleInputChange}
+          filterRating={filterRating}
+          setFilterRating={setFilterRating}
         />
       )}
     </LayoutWrapper>
 
-    // <section className="w-full h-screen flex flex-col">
-    //   <div className="hidden sm:flex">
-    //     <Navbar />
-    //   </div>
-    //   <div className="flex flex-col justify-center items-center mt-auto mb-auto">
-    //     {!showResults && (
-    //       <>
-    //         <div className="flex flex-col justify-center items-center mt-20 text-center sm:w-full w-3/4">
-    //           <h1 className="text-darkblueui font-bold text-3xl">
-    //             What do you want to learn?
-    //           </h1>
-    //           <p className="text-darkblueui font-normal text-sm text-center">
-    //             Search topics, teachers and price ranges about anything you{" "}
-    //             <br className="hidden sm:flex" /> want to learn.
-    //           </p>
-    //         </div>
-    //         <div className="border-2 border-[#d7e3f4] rounded-full sm:w-96 mt-8 mx-auto">
-    //           <form className="w-full max-w-sm" onSubmit={handleFormSubmit}>
-    //             <div className="flex justify-center items-center py-1">
-    //               <input
-    //                 className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-3 leading-tight focus:outline-none"
-    //                 type="text"
-    //                 placeholder=""
-    //                 value={searchTerm}
-    //                 onChange={handleInputChange}
-    //               />
-    //               <button
-    //                 className="flex-shrink-0 bg-darkblueui text-sm text-white py-2 px-4 rounded-full mr-1 hover:bg-blueui"
-    //                 type="submit"
-    //               >
-    //                 Search
-    //               </button>
-    //             </div>
-    //           </form>
-    //         </div>
-    //         <div className="flex mt-4 justify-center">
-    //           <SelectFilter
-    //             filterPrice={filterPrice}
-    //             setFilterPrice={setFilterPrice}
-    //           />
-    //         </div>
-    //         <div className="mt-4 flex flex-col min-h-[100px] px-4">
-    //           <span className="text-center text-lg">Select Topics</span>
-    //           <QuickLinks
-    //             selectedTopics={selectedTopics}
-    //             setSelectedTopics={setSelectedTopics}
-    //           />
-    //         </div>
-    //       </>
-    //     )}
-    //     {showResults && (
-    //       <SearchPage
-    //         searchTerm={searchTerm}
-    //         filterPrice={filterPrice}
-    //         selectedTopics={selectedTopics}
-    //         setFilterPrice={setFilterPrice}
-    //         setSelectedTopics={setSelectedTopics}
-    //       />
-    //     )}
-    //   </div>
-    //   <div className="sm:hidden flex h-full items-end pb-4">
-    //     <Navbar />
-    //   </div>
-    // </section>
   );
 };
 

@@ -6,14 +6,14 @@ import { Star } from "lucide-react";
 
 const SeeProfile = ({
   bio,
-  created_at,
   email,
   expertise,
   id,
   name,
   role,
   topics,
-  payment_details,
+  hourly_rate,
+  avg_rating,
   image_url,
   handleProfileClose,
   ratingData,

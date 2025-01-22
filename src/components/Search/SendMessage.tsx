@@ -31,10 +31,9 @@ const SendMessage = ({
   id,
   topics,
   handleClose,
-  created_at,
   image_url,
-  payment_details,
-  country,
+  avg_rating,
+  hourly_rate,
   ratingData,
 }: SearchUserData & { handleClose: () => void; ratingData: any }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -215,7 +214,7 @@ const SendMessage = ({
           }`}
         >
           <span className="text-xl font-semibold text-[#1e1e4a]">
-            ${payment_details?.hourly_rate}/hour
+            ${hourly_rate}/hour
           </span>
 
           {channel ? (

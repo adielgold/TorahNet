@@ -19,11 +19,10 @@ const SearchResultCard = ({
   expertise,
   id,
   topics,
-  created_at,
   role,
-  payment_details,
+  avg_rating,
+  hourly_rate,
   image_url,
-  country,
   index,
 }: SearchUserData & { index: number }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -92,7 +91,7 @@ const SearchResultCard = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-[#1e1e4a]">
-                ${payment_details?.hourly_rate}/hour
+                ${hourly_rate}/hour
               </span>
               <Button
                 onClick={() => setIsOpen(true)}
@@ -166,13 +165,12 @@ const SearchResultCard = ({
             expertise={expertise}
             id={id}
             name={name}
-            created_at={created_at}
             role={role}
             topics={topics}
-            payment_details={payment_details}
+            avg_rating={avg_rating}
+            hourly_rate={hourly_rate}
             image_url={image_url}
             handleClose={handleClose}
-            country={country}
             ratingData={ratingData}
           />
         </AnimatePresence>
