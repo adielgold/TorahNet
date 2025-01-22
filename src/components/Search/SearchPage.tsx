@@ -16,16 +16,18 @@ type SearchPageProps = {
   setSelectedTopics: React.Dispatch<React.SetStateAction<string[]>>;
   filterPrice: string;
   setFilterPrice: React.Dispatch<React.SetStateAction<string>>;
+  filterRating: string;
+  setFilterRating: React.Dispatch<React.SetStateAction<string>>;
   handleInputChange: (value: string) => void;
 };
 
 const SearchPage = ({
   searchTerm,
-  selectedTopics,
   filterPrice,
   setFilterPrice,
-  setSelectedTopics,
   handleInputChange,
+  filterRating,
+  setFilterRating,
 }: SearchPageProps) => {
   const { loading } = useSearchUserStore();
 
@@ -69,6 +71,16 @@ const SearchPage = ({
             <SliderComponent
               filterPrice={filterPrice}
               setFilterPrice={setFilterPrice}
+              max={100}
+              type="price"
+            />
+          </div>
+          <div className="w-full flex flex-col  ">
+            <p className="mb-10 text-darkblueui text-md">Ratings</p>
+            <SliderComponent
+              filterPrice={filterRating}
+              setFilterPrice={setFilterRating}
+              max={5}
             />
           </div>
 

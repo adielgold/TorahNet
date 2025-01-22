@@ -292,6 +292,28 @@ export type Database = {
           average_score: number
         }[]
       }
+      search_teachers: {
+        Args: {
+          search?: string
+          selected_topics?: string[]
+          start_price?: number
+          end_price?: number
+          start_rating?: number
+          end_rating?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          role: string
+          email: string
+          expertise: string
+          bio: string
+          image_url: string
+          topics: string[]
+          hourly_rate: number
+          avg_rating: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

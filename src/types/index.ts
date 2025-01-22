@@ -10,8 +10,9 @@ type Reviews = Tables<"reviews">;
 
 type Payments = Tables<"payments">;
 
-type SearchUserData = User & {
-  payment_details: { hourly_rate: number | null };
+type SearchUserData = Omit<User,'created_at' | 'country'> & {
+  hourly_rate: number | null 
+  avg_rating: number | null
 };
 
 type SessionWithUsers = Session & {
