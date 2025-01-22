@@ -34,8 +34,7 @@ export function SelectFilterRating({
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Ratings</SelectLabel>
-              <SelectItem value="0-0">Not Rated</SelectItem>
-              <SelectItem value="0-1">0-1</SelectItem>
+              <SelectItem value="0-1">0-1 Or (Not Rated)</SelectItem>
               <SelectItem value="1-2">1-2</SelectItem>
               <SelectItem value="2-3">2-3</SelectItem>
               <SelectItem value="3-4">3-4</SelectItem>
