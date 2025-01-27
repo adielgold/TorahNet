@@ -10,6 +10,7 @@ import {
   MessageSquare,
   User,
   LayoutDashboard,
+  TowerControl,
   History,
   CreditCard,
   Settings,
@@ -23,17 +24,6 @@ import { useUserStore } from "@/stores/userStore";
 import { StreamChat } from "stream-chat";
 import MessagingSidebar from "../Chat/MessagingSidebar";
 import Image from "next/image";
-
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/profile/dashboard" },
-  { icon: History, label: "Session History", href: "/profile/session-history" },
-  {
-    icon: CreditCard,
-    label: "Payment History",
-    href: "/profile/payment-history",
-  },
-  { icon: Settings, label: "Settings", href: "/profile/settings" },
-];
 
 export default function NavbarWrapper({
   children,
@@ -52,6 +42,21 @@ export default function NavbarWrapper({
   const client = StreamChat.getInstance(
     process.env.NEXT_PUBLIC_STREAM_API_KEY!
   );
+
+  const menuItems = user?.role === 'admin' ? 
+  [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/profile/admin/dashboard" },
+    { icon: TowerControl, label: "Resolution Center", href: "/profile/admin/resolution-center" },
+    { icon: CreditCard, label: "Payments", href: "/profile/admin/payments" },
+    { icon: User, label: "Users", href: "/profile/admin/users" },
+    { icon: Settings, label: "Settings", href: "/profile/admin/settings" },
+  ] : 
+  [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/profile/dashboard" },
+    { icon: History, label: "Session History", href: "/profile/session-history" },
+    { icon: CreditCard, label: "Payment History", href: "/profile/payment-history" },
+    { icon: Settings, label: "Settings", href: "/profile/settings" },
+  ];
 
   return (
     <div className="flex h-screen flex-col">
@@ -112,7 +117,7 @@ export default function NavbarWrapper({
           </Link>
           <div className="flex-1" />
           <Link
-            href="/profile/dashboard"
+            href={user?.role === 'admin' ? "/profile/admin/dashboard" : "/profile/dashboard"}
             className={`flex items-center space-x-2 py-2 px-3 rounded-full text-gray-600  ${
               pathname?.startsWith("/profile")
                 ? "bg-blueui text-white"
