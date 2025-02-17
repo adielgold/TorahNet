@@ -7,7 +7,7 @@ import { Grid, Paper, Box, Typography, Chip, Stack } from '@mui/material';
 import ToggleButtonsComponent, { ToggleButtonItem } from "@/components/ToggleButtons/ToggleButtons";
 import { StyledAdminPanelBoxContainer } from "@/styles/components/AdminPanel";
 import { AgCharts } from "ag-charts-react";
-import { color } from "framer-motion";
+import { AgChartOptions } from 'ag-charts-community';
 
 
 const timeToggleItems: ToggleButtonItem[] = [
@@ -178,7 +178,7 @@ const Profile = () => {
   }, []);  
 
 
-  const userRolesOptions = {
+  const userRolesOptions: AgChartOptions = {
     data: roleData,
     series: [
       {
@@ -196,7 +196,7 @@ const Profile = () => {
     },
   };
 
-  const barChartOptions = {
+  const barChartOptions: AgChartOptions = {
     data: monthlyUserData,
     series: [
       {
@@ -257,7 +257,8 @@ const Profile = () => {
           <Grid container direction="column" spacing={2}>
             <Grid item>
               <StyledAdminPanelBoxContainer>
-                Content Box 5
+              <Typography fontSize="18px" fontWeight="bold" color="#1e1e4a" marginBottom="15px">Revenue</Typography>
+              <Typography fontSize="20px" fontWeight="bold" color="#1e1e4a">-- Not calculated yet --</Typography>
               </StyledAdminPanelBoxContainer>
             </Grid>
           </Grid>
