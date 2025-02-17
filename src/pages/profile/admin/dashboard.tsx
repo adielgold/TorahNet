@@ -1,26 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Sidebar, Navbar } from "@/components";
-import { FaCalendarAlt } from "react-icons/fa";
-import SessionPlan from "@/components/SessionPlan/SessionPlan";
-import {
-  ProfileQuickLinkSection,
-  HamburgerDashboard,
-  SidebarSlider,
-} from "@/components";
-import SessionPhoneSection from "@/components/SessionPlan/SessionPhoneSection";
-import { FaRegCircleQuestion } from "react-icons/fa6";
+import React, { use, useCallback, useEffect, useState } from "react";
 import withAuth from "@/components/withAuth/withAuth";
 import { useUserStore } from "@/stores/userStore";
 import { createClient } from "@/utils/supabase/client";
-import { SessionWithUsers } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
 import LayoutWrapper from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Grid, Paper, Box, Typography, Chip, Stack } from '@mui/material';
 import ToggleButtonsComponent, { ToggleButtonItem } from "@/components/ToggleButtons/ToggleButtons";
+import { StyledAdminPanelBoxContainer } from "@/styles/components/AdminPanel";
 
 const timeToggleItems: ToggleButtonItem[] = [
     {label: 'Today', value: 'DAY'},
@@ -34,65 +19,129 @@ const Profile = () => {
 
   const supabase = createClient();
 
-  const [sessions, setSessions] = useState<SessionWithUsers[] | []>([]);
-  const [refreshSessions, setRefreshSessions] = useState<boolean>(false);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>('');
+  const [recentUsers, setRecentUsers] = useState<Array<{ created_at: string }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [newUsersCount, setNewUsersCount] = useState(0);
+  const [popularTopics, setPopularTopics] = useState<string[]>([]);
 
-  const handleTimeToggleChange = useCallback((newVal: string) => {
-        console.log(newVal);
-  },[]);
 
-  return (
+  useEffect(() => {
+    const fetchRecentUsers = async () => {
+      setIsLoading(true);
+      try {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+        const { data, error } = await supabase
+          .from("users")
+          .select("created_at")
+          .gte("created_at", oneMonthAgo.toISOString())
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setRecentUsers(data || []);
+      } catch (error) {
+        console.error("Error fetching recent users:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentUsers();
+  }, []);
+
+  useEffect(() => {
+    const now = new Date();
+    let startDate = new Date();
+  
+    switch (selectedTimeRange) {
+      case "DAY":
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "WEEK":
+        startDate.setDate(now.getDate() - now.getDay());
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "MONTH":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      default:
+        startDate.setHours(0, 0, 0, 0);
+    }
+    
+    const count = recentUsers.filter(user => {
+      const createdAt = new Date(user.created_at);
+      return createdAt >= startDate;
+    }).length;
+  
+    setNewUsersCount(count);
+  }, [selectedTimeRange, recentUsers]);
+  
+  useEffect(() => {
+    const fetchPopularTopics = async () => {
+      const { data, error } = await supabase.rpc("get_popular_topics");
+    
+      if (error) {
+        console.error("Error fetching popular topics:", error);
+        return;
+      }
+    
+      setPopularTopics(data);
+    };
+  
+    fetchPopularTopics();
+  }, []);
+
+
+  return user?.role === 'admin' ? (
     <LayoutWrapper>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
-      <div style={{textAlign: 'center'}}>
-        <ToggleButtonsComponent items={timeToggleItems} onChange={handleTimeToggleChange} defaultValue="DAY" />
+      <div style={{textAlign: 'center', marginBottom: '20px'}}>
+        <ToggleButtonsComponent items={timeToggleItems} onChange={setSelectedTimeRange} defaultValue="DAY" />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-2/3">
-          {!sessionsLoading && sessions.length > 0 ? (
-            <SessionPlan
-              sessions={sessions}
-              refreshSessions={() => setRefreshSessions(!refreshSessions)}
-            />
-          ) : (
-            <>
-              <Skeleton className="h-[120px] w-full mt-4" />
-              <Skeleton className="h-[120px] w-full mt-2.5" />
-              <Skeleton className="h-[120px] w-full mt-2.5" />
-            </>
-          )}
-        </div>
-        <div className="w-full lg:w-1/3 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Liked Articles</CardTitle>
-            </CardHeader>
-            <CardContent>
-             
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Sessions finished last month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Favourite Topics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4}>
+          <Grid container direction="column" spacing={2}>
+            <Grid item>
+              <StyledAdminPanelBoxContainer>
+                <Typography fontSize="18px" fontWeight="bold" color="#1e1e4a" marginBottom="15px">New registrations</Typography>
+                <Typography fontSize="20px" fontWeight="bold" color="#1e1e4a">{newUsersCount} new users</Typography>
+              </StyledAdminPanelBoxContainer>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Grid container direction="column" spacing={2}>
+            <Grid item>
+              <StyledAdminPanelBoxContainer>
+              <Typography fontSize="18px" fontWeight="bold" color="#1e1e4a" marginBottom="15px">Popular Topics</Typography>
+              <Stack direction="row" gap={1} flexWrap="wrap">
+                {popularTopics.map((topic, index) => (
+                  <Chip key={index} label={topic} variant="outlined"/>
+                ))}
+              </Stack>
+              </StyledAdminPanelBoxContainer>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Grid container direction="column" spacing={2}>
+            <Grid item>
+              <StyledAdminPanelBoxContainer>
+                Content Box 5
+              </StyledAdminPanelBoxContainer>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Box>
     </LayoutWrapper>
-  );
+  ) : null;
 };
 
 export default withAuth(Profile);
