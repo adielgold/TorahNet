@@ -1,4 +1,4 @@
-import React, { use, useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import withAuth from "@/components/withAuth/withAuth";
 import { useUserStore } from "@/stores/userStore";
 import { createClient } from "@/utils/supabase/client";
@@ -6,6 +6,9 @@ import LayoutWrapper from "@/components/Layout";
 import { Grid, Paper, Box, Typography, Chip, Stack } from '@mui/material';
 import ToggleButtonsComponent, { ToggleButtonItem } from "@/components/ToggleButtons/ToggleButtons";
 import { StyledAdminPanelBoxContainer } from "@/styles/components/AdminPanel";
+import { AgCharts } from "ag-charts-react";
+import { color } from "framer-motion";
+
 
 const timeToggleItems: ToggleButtonItem[] = [
     {label: 'Today', value: 'DAY'},
@@ -24,6 +27,9 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [newUsersCount, setNewUsersCount] = useState(0);
   const [popularTopics, setPopularTopics] = useState<string[]>([]);
+  const [roleData, setRoleData] = useState<{role: string, count: number}[]>([]);
+  const [monthlyUserData, setMonthlyUserData] = useState<{ month: string, count: number }[]>([]);
+
 
 
   useEffect(() => {
@@ -93,15 +99,133 @@ const Profile = () => {
     fetchPopularTopics();
   }, []);
 
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("role");
+    
+        if (error) throw error;
+    
+        const validUsers = data.filter((user) => user.role !== null);
+    
+        const roleCounts = validUsers.reduce((acc: Record<string, number>, user) => {
+          const role = user.role as string;
+          acc[role] = (acc[role] || 0) + 1;
+          return acc;
+        }, {});
+    
+        const formattedData = Object.keys(roleCounts).map((role) => ({
+          role,
+          count: roleCounts[role],
+        }));
+    
+        setRoleData(formattedData);
+      } catch (error) {
+        console.error("Error fetching user roles:", error);
+      }
+    };
+    
+    fetchUserRoles();
+  }, []);
+
+  useEffect(() => {
+    const fetchUsersByMonth = async () => {
+      try {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5); // Go back 5 months (current month included)
+  
+        const { data, error } = await supabase
+          .from("users")
+          .select("created_at");
+  
+        if (error) throw error;
+  
+        // Create a map to count users per month
+        const userCounts = new Map();
+  
+        // Initialize last 6 months with 0 counts
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+          userCounts.set(key, 0);
+        }
+  
+        // Count users per month
+        data.forEach(user => {
+          const date = new Date(user.created_at);
+          const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+          if (userCounts.has(key)) {
+            userCounts.set(key, userCounts.get(key) + 1);
+          }
+        });
+  
+        // Convert map to array for the chart
+        const formattedData = Array.from(userCounts.entries()).map(([month, count]) => ({
+          month,
+          count,
+        }));
+  
+        setMonthlyUserData(formattedData);
+      } catch (error) {
+        console.error("Error fetching users by month:", error);
+      }
+    };
+  
+    fetchUsersByMonth();
+  }, []);  
+
+
+  const userRolesOptions = {
+    data: roleData,
+    series: [
+      {
+        type: "donut",
+        calloutLabelKey: "role",
+        angleKey: "count",
+        innerRadiusRatio: 0.7,
+        cornerRadius: 3,
+      },
+    ],
+    title: {
+      text: "User Roles",
+      color: "#1e1e4a",
+      fontWeight: "bold",
+    },
+  };
+
+  const barChartOptions = {
+    data: monthlyUserData,
+    series: [
+      {
+        type: "bar",
+        xKey: "month",
+        yKey: "count",
+        label: {
+          enabled: true,
+        },
+        cornerRadius: 10,
+      },
+    ],
+    title: {
+      text: "New Users Per Month",
+      color: "#1e1e4a",
+      fontWeight: "bold",
+    },
+  };
+  
+
 
   return user?.role === 'admin' ? (
     <LayoutWrapper>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
-      <div style={{textAlign: 'center', marginBottom: '20px'}}>
+      <div style={{textAlign: 'center', marginBottom: '30px'}}>
         <ToggleButtonsComponent items={timeToggleItems} onChange={setSelectedTimeRange} defaultValue="DAY" />
       </div>
 
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, marginBottom: "30px" }}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={4}>
           <Grid container direction="column" spacing={2}>
@@ -140,6 +264,14 @@ const Profile = () => {
         </Grid>
       </Grid>
     </Box>
+    <Stack direction="row" justifyContent="space-between" gap="20px">
+      <StyledAdminPanelBoxContainer>
+        <AgCharts options={userRolesOptions} />
+      </StyledAdminPanelBoxContainer>
+      <StyledAdminPanelBoxContainer>
+        <AgCharts options={barChartOptions} />
+      </StyledAdminPanelBoxContainer>
+    </Stack>
     </LayoutWrapper>
   ) : null;
 };
