@@ -6,6 +6,7 @@ export const StyledAdminPanelBoxContainer = styled('div')`
     padding: 15px;
     border-radius: 25px;
     background-color: white;
+    height: 100%;
 
     & .MuiChip-root {
     color: #1e1e4a;

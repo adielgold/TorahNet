@@ -316,7 +316,7 @@ export type Database = {
       }
       get_popular_topics: {
         Args: {};
-        Returns: string[];
+        Returns: {topic: string, count: number}[];
       };
     }
     Enums: {

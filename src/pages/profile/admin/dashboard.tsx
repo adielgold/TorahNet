@@ -26,7 +26,7 @@ const Profile = () => {
   const [recentUsers, setRecentUsers] = useState<Array<{ created_at: string }>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newUsersCount, setNewUsersCount] = useState(0);
-  const [popularTopics, setPopularTopics] = useState<string[]>([]);
+  const [popularTopics, setPopularTopics] = useState<{topic: string, count: number}[]>([]);
   const [roleData, setRoleData] = useState<{role: string, count: number}[]>([]);
   const [monthlyUserData, setMonthlyUserData] = useState<{ month: string, count: number }[]>([]);
 
@@ -145,18 +145,18 @@ const Profile = () => {
         // Create a map to count users per month
         const userCounts = new Map();
   
-        // Initialize last 6 months with 0 counts
         for (let i = 5; i >= 0; i--) {
           const date = new Date();
           date.setMonth(date.getMonth() - i);
-          const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+          const formatYear = date.getFullYear() % 100;
+          const key = `${formatYear}/${date.getMonth() + 1}`;
           userCounts.set(key, 0);
         }
   
-        // Count users per month
         data.forEach(user => {
           const date = new Date(user.created_at);
-          const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+          const formatYear = date.getFullYear() % 100;
+          const key = `${formatYear}/${date.getMonth() + 1}`;
           if (userCounts.has(key)) {
             userCounts.set(key, userCounts.get(key) + 1);
           }
@@ -196,7 +196,25 @@ const Profile = () => {
     },
   };
 
-  const barChartOptions: AgChartOptions = {
+  const popularTopicsOptions: AgChartOptions = {
+    data: popularTopics,
+    series: [
+      {
+        type: "donut",
+        calloutLabelKey: "topic",
+        angleKey: "count",
+        innerRadiusRatio: 0.7,
+        cornerRadius: 3,
+      },
+    ],
+    title: {
+      text: "Popular Topics",
+      color: "#1e1e4a",
+      fontWeight: "bold",
+    },
+  };
+
+  const usersPerMonthOptions: AgChartOptions = {
     data: monthlyUserData,
     series: [
       {
@@ -242,12 +260,8 @@ const Profile = () => {
           <Grid container direction="column" spacing={2}>
             <Grid item>
               <StyledAdminPanelBoxContainer>
-              <Typography fontSize="18px" fontWeight="bold" color="#1e1e4a" marginBottom="15px">Popular Topics</Typography>
-              <Stack direction="row" gap={1} flexWrap="wrap">
-                {popularTopics.map((topic, index) => (
-                  <Chip key={index} label={topic} variant="outlined"/>
-                ))}
-              </Stack>
+              <Typography fontSize="18px" fontWeight="bold" color="#1e1e4a" marginBottom="15px">Total Revenue</Typography>
+              <Typography fontSize="20px" fontWeight="bold" color="#1e1e4a">-- Not calculated yet --</Typography>
               </StyledAdminPanelBoxContainer>
             </Grid>
           </Grid>
@@ -270,7 +284,10 @@ const Profile = () => {
         <AgCharts options={userRolesOptions} />
       </StyledAdminPanelBoxContainer>
       <StyledAdminPanelBoxContainer>
-        <AgCharts options={barChartOptions} />
+        <AgCharts options={popularTopicsOptions} />
+      </StyledAdminPanelBoxContainer>
+      <StyledAdminPanelBoxContainer>
+        <AgCharts options={usersPerMonthOptions} />
       </StyledAdminPanelBoxContainer>
     </Stack>
     </LayoutWrapper>
