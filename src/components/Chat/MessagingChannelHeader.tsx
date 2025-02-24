@@ -1,6 +1,6 @@
 import { ArrowIconWhite } from "@/Icons";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import {
   Avatar,
@@ -34,10 +34,15 @@ import {
   CardTitle,
 } from "../ui/card";
 import axios from "axios";
+import { loadScript } from "@paypal/paypal-js";
+import { capturePaypalPayment } from "@/lib/capturePaypalPayment";
 
 const MessagingChannelHeader: React.FC = () => {
   const { client } = useChatContext();
   const { channel } = useChannelStateContext();
+  const router = useRouter();
+
+  const { toast } = useToast();
 
   const [existingSession, setExistingSession] =
     useState<SessionWithUsers | null>(null);
@@ -48,18 +53,16 @@ const MessagingChannelHeader: React.FC = () => {
   const unfiltredMembers = Object.values(channel.state.members || {});
 
   const members = Object.values(channel.state.members).filter(
-    (member) => member.user?.id !== client?.user?.id
+    (member) => member.user?.id !== client?.user?.id,
   );
 
   const onlineMembers = unfiltredMembers.filter(
-    (member) => member.user?.online
+    (member) => member.user?.online,
   );
 
   const supabase = createClient();
 
   const { user } = useUserStore();
-
-  const { toast } = useToast();
 
   const { client: streamClient } = useStreamClient();
 
@@ -130,12 +133,28 @@ const MessagingChannelHeader: React.FC = () => {
       //   `/checkout?sessionId=${sessionData.id}&studentId=${sessionData.student_id}&teacherId=${sessionData.teacher_id}&amount=${sessionData.teacher?.[0]?.payment_details?.hourly_rate}`
       // );
 
-      const checkoutData = await axios.post("/api/stripe/checkout", {
-        sessionId: sessionData.id,
-      });
+      try {
+        const response = await fetch("/api/paypal/payments/create-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId: sessionData.id,
+          }),
+        });
 
-      if (checkoutData?.data) {
-        window.location.href = checkoutData?.data.url;
+        const data = await response.json();
+
+        if (data.approveUrl) {
+          window.location.href = data.approveUrl;
+          // Or if using Next.js router:
+          // router.push(data.approveUrl);
+        } else if (data.payerActionUrl) {
+          window.location.href = data.payerActionUrl;
+        }
+      } catch (error) {
+        console.error("Error creating PayPal order:", error);
       }
     }
   };
@@ -179,10 +198,54 @@ const MessagingChannelHeader: React.FC = () => {
     fetchExistingSession();
   }, []);
 
-  const router = useRouter();
+  const paymentProcessed = useRef(false);
+
+  useEffect(() => {
+    const { token, PayerID, payment, sessionId, teacherId, studentId } =
+      router.query;
+
+    if (token && PayerID && payment === "true" && !paymentProcessed.current) {
+      const handlePayment = async () => {
+        try {
+          paymentProcessed.current = true;
+
+          const { success, data, error } = await capturePaypalPayment(
+            token as string,
+            sessionId as string,
+            teacherId as string,
+            studentId as string,
+          );
+
+          if (success) {
+            localStorage.setItem(`payment_${token}`, "captured");
+
+            toast({
+              title: "Payment Successful!",
+              description: "Your payment has been processed successfully.",
+              variant: "default",
+            });
+            console.log(data, "Data");
+          } else {
+            toast({
+              title: "Payment Failed",
+              description:
+                typeof error === "string"
+                  ? error
+                  : "There was an error processing your payment.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Payment capture error:", error);
+        }
+      };
+
+      handlePayment();
+    }
+  }, [router.query]);
 
   return (
-    <div className="flex items-center justify-between  min-h-[80px] px-5">
+    <div className="flex min-h-[80px] items-center justify-between px-5">
       <div className="flex items-center gap-3">
         <Avatar
           name={members?.[0]?.user?.name}
@@ -191,7 +254,7 @@ const MessagingChannelHeader: React.FC = () => {
           user={members?.[0]?.user}
         />
         <div>
-          <p className="text-darkblueui text-xl font-bold">
+          <p className="text-xl font-bold text-darkblueui">
             {members?.[0]?.user?.name}
           </p>
         </div>
@@ -202,10 +265,10 @@ const MessagingChannelHeader: React.FC = () => {
             <button
               onClick={() =>
                 router.push(
-                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`
+                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`,
                 )
               }
-              className="bg-primary-blue px-4 h-9 rounded-full text-white text-sm items-center whitespace-nowrap flex"
+              className="flex h-9 items-center whitespace-nowrap rounded-full bg-primary-blue px-4 text-sm text-white"
             >
               <FaUser className="mr-2" />
               Join Meeting
@@ -216,15 +279,15 @@ const MessagingChannelHeader: React.FC = () => {
             <DialogTrigger asChild>
               <button
                 onClick={() => setIsDialogOpen(!isDialogOpen)}
-                className="bg-darkblueui px-4 h-9 rounded-full text-white text-sm items-center whitespace-nowrap flex"
+                className="flex h-9 items-center whitespace-nowrap rounded-full bg-darkblueui px-4 text-sm text-white"
               >
                 <FaUser className="mr-2" />
                 View Meeting
               </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-white">
+            <DialogContent className="bg-white sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-center text-indigo-900">
+                <DialogTitle className="text-center text-2xl font-bold text-indigo-900">
                   Your Session Details
                 </DialogTitle>
               </DialogHeader>
@@ -237,23 +300,23 @@ const MessagingChannelHeader: React.FC = () => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0">
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-6 h-6 text-darkblueui" />
+                        <Calendar className="h-6 w-6 text-darkblueui" />
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!
+                                existingSession?.scheduledAt!,
                               ).toLocaleDateString()
                             : ""}
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Clock className="w-6 h-6 text-darkblueui" />
+                        <Clock className="h-6 w-6 text-darkblueui" />
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!
+                                existingSession?.scheduledAt!,
                               ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -263,14 +326,14 @@ const MessagingChannelHeader: React.FC = () => {
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-darkblueui  text-white"
+                      className="w-full bg-darkblueui text-white"
                       onClick={() => {
                         // Add calendar download logic here
                         console.log("Downloading calendar...");
                         setIsDialogOpen(false);
                       }}
                     >
-                      <Download className="w-5 h-5 mr-2" />
+                      <Download className="mr-2 h-5 w-5" />
                       Download Calendar
                     </Button>
                   </motion.div>
@@ -282,7 +345,7 @@ const MessagingChannelHeader: React.FC = () => {
       ) : (
         <button
           onClick={() => setIsPlanDialogOpen(!isPlanDialogOpen)}
-          className="bg-darkblueui px-4 h-9 rounded-full text-white text-sm items-center whitespace-nowrap flex"
+          className="flex h-9 items-center whitespace-nowrap rounded-full bg-darkblueui px-4 text-sm text-white"
         >
           <FaUser className="mr-2" />
           Plan Meeting
@@ -290,13 +353,13 @@ const MessagingChannelHeader: React.FC = () => {
       )}
 
       {isPlanDialogOpen && (
-        <div className="fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 ">
+        <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center">
           <div
-            className="absolute w-full h-full bg-gray-900 opacity-50 "
+            className="absolute h-full w-full bg-gray-900 opacity-50"
             onClick={() => setIsPlanDialogOpen(false)}
           ></div>
 
-          <Card className="z-50 ">
+          <Card className="z-50">
             <CardContent className="sm:max-w-[425px]">
               <CardHeader className="px-0">
                 <CardTitle>Reschedule Session</CardTitle>

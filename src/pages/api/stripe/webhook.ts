@@ -12,7 +12,7 @@ export const config = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const supabase = createClient(req, res);
 
@@ -24,7 +24,7 @@ export default async function handler(
     const event = stripe.webhooks.constructEvent(
       buf.toString(),
       signature!,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
 
     switch (event.type) {
@@ -36,10 +36,12 @@ export default async function handler(
           .select("*")
           .eq("id", checkout.metadata?.sessionId)
           .single();
+
         await supabase
           .from("sessions")
           .update({ status: "scheduled" })
           .eq("id", sessionD?.id);
+
         const { data, error } = await supabase
           .from("payments")
           .insert({
@@ -52,10 +54,11 @@ export default async function handler(
             student_id: sessionD?.student_id,
             status: "onhold",
             payout_due_date: new Date(
-              new Date(sessionD.scheduledAt).getTime() + 7 * 24 * 60 * 60 * 1000
+              new Date(sessionD.scheduledAt).getTime() +
+                7 * 24 * 60 * 60 * 1000,
             ),
             teacher_amount: Number(
-              (((checkout?.amount_total ?? 0) / 100) * 0.9)?.toFixed(2)
+              (((checkout?.amount_total ?? 0) / 100) * 0.9)?.toFixed(2),
             ),
           })
           .select("*");

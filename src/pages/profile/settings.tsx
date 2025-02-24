@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
+import PayPalConnect from "@/components/Paypal/PayPalConnect";
 
 interface AdjustPersonalDetailsForm {
   name: string;
@@ -50,6 +51,12 @@ const Settings = () => {
   const [imageUploadLoading, setImageUploadLoading] = useState(false);
 
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+
+  const initialOptions = {
+    clientId: "test",
+    currency: "USD",
+    intent: "capture",
+  };
 
   const [topics, setTopics] = useState<string[]>([
     "Laudantium Non Provident",
@@ -315,10 +322,10 @@ const Settings = () => {
 
   return (
     <LayoutWrapper>
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <Card className="mb-8">
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
               <input
                 type="file"
                 ref={inputRef}
@@ -327,18 +334,18 @@ const Settings = () => {
                 accept="image/*"
               />
               <Avatar
-                className="w-32 h-32 cursor-pointer"
+                className="h-32 w-32 cursor-pointer"
                 onClick={() => inputRef?.current?.click()}
               >
                 <AvatarImage src={user?.image_url!} alt={user?.name!} />
                 <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl font-bold mb-2">{user?.name}</h1>
-                <p className="text-gray-600 mb-4">{user?.expertise}</p>
-                <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                <h1 className="mb-2 text-3xl font-bold">{user?.name}</h1>
+                <p className="mb-4 text-gray-600">{user?.expertise}</p>
+                <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
                   {selectedTopics?.map((topic, index) => (
-                    <Badge key={index} className="p-2 bg-darkblueui">
+                    <Badge key={index} className="bg-darkblueui p-2">
                       {topic}
                     </Badge>
                   ))}
@@ -349,7 +356,7 @@ const Settings = () => {
         </Card>
         {/* <form onSubmit={handleSubmit(onSubmitPersonalDetails)}> */}
         <Card>
-          <CardHeader className="flex items-center justify-between flex-row">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Personal Details</CardTitle>
             {isEditing ? (
               <Button
@@ -407,7 +414,7 @@ const Settings = () => {
                 />
               </div>
             )}
-            <CardTitle className=" pt-4">Topics</CardTitle>
+            <CardTitle className="pt-4">Topics</CardTitle>
             <div className="flex flex-wrap gap-2">
               {topics?.map((topic, index) => (
                 <Badge
@@ -415,14 +422,14 @@ const Settings = () => {
                   // variant={
                   //   selectedTopics?.includes(topic) ? "default" : "outline"
                   // }
-                  className={` p-2 ${
+                  className={`p-2 ${
                     isEditing
-                      ? "hover:bg-[#2a2a5a] hover:text-white cursor-pointer"
-                      : "hover:bg-white cursor-auto"
+                      ? "cursor-pointer hover:bg-[#2a2a5a] hover:text-white"
+                      : "cursor-auto hover:bg-white"
                   } ${
                     selectedTopics?.includes(topic) && isEditing
                       ? "bg-[#2a2a5a]"
-                      : "bg-white text-blueui border border-blueui"
+                      : "border border-blueui bg-white text-blueui"
                   }`}
                   onClick={() => isEditing && toggleTopic(topic)}
                 >
@@ -450,21 +457,15 @@ const Settings = () => {
                 </div>
                 <div>
                   <Label htmlFor="cardNumber" className="block">
-                    Connect yout Stripe Account
+                    Connect yout PayPal Account
                   </Label>
 
                   {!paymentDetails?.stripe_account_id &&
                   !paymentDetails?.onboarding_completed ? (
-                    <Button
-                      onClick={connectStripeAccount}
-                      className="bg-darkblueui mt-4"
-                    >
-                      Connect Stripe Account
-                    </Button>
+                    <PayPalConnect />
                   ) : null}
-
                   {paymentDetails?.disabled_reason && (
-                    <p className="text-red-500 font-medium mt-1.5 text-sm">
+                    <p className="mt-1.5 text-sm font-medium text-red-500">
                       Your account Has been Rejected for{" "}
                       {paymentDetails?.disabled_reason?.split(".")?.[1]} Reason.
                       Please contact support
@@ -474,7 +475,7 @@ const Settings = () => {
                   {paymentDetails?.stripe_account_id &&
                   !paymentDetails?.onboarding_completed &&
                   !paymentDetails?.disabled_reason ? (
-                    <p className="text-red-500 font-medium mt-1.5 text-xs">
+                    <p className="mt-1.5 text-xs font-medium text-red-500">
                       Your account is under review
                     </p>
                   ) : null}
@@ -484,10 +485,10 @@ const Settings = () => {
                     !paymentDetails?.disabled_reason && (
                       <Button
                         onClick={() => window?.open(loginLink!, "_blank")}
-                        className="bg-darkblueui mt-4"
+                        className="mt-4 bg-darkblueui"
                         disabled={!loginLink}
                       >
-                        Go to Stripe Dashboard
+                        Go to PayPal Dashboard
                       </Button>
                     )}
                 </div>

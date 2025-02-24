@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     const supabase = createClient(req, res);
@@ -31,7 +31,7 @@ export default async function handler(
               *,
               payment_details(*)
              )
-            `
+            `,
         )
         .eq("id", sessionId)
         .single();
@@ -55,7 +55,7 @@ export default async function handler(
                 }),
               },
               unit_amount: Math.round(
-                sessionData?.teacher?.payment_details?.hourly_rate * 1.05 * 100
+                sessionData?.teacher?.payment_details?.hourly_rate * 1.05 * 100,
               ),
             },
             quantity: 1,
@@ -66,7 +66,7 @@ export default async function handler(
           teacherId: sessionData?.teacher_id,
           studentId: data?.user?.id,
           platformFee: Math.round(
-            sessionData?.teacher?.payment_details?.hourly_rate * 0.05 * 100
+            sessionData?.teacher?.payment_details?.hourly_rate * 0.05 * 100,
           ),
         },
         success_url: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/profile/dashboard?sessionId=${sessionId}&payment_success=true`,
