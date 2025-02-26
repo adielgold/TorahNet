@@ -314,6 +314,10 @@ export type Database = {
           avg_rating: number
         }[]
       }
+      get_popular_topics: {
+        Args: {};
+        Returns: {topic: string, count: number}[];
+      };
     }
     Enums: {
       [_ in never]: never
