@@ -283,6 +283,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_popular_topics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          topic: string
+          count: number
+        }[]
+      }
       get_teacher_review_stats: {
         Args: {
           teacher_id_input: string

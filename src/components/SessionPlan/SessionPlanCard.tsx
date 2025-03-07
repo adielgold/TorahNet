@@ -41,7 +41,6 @@ type SessionPlanCardProps = {
   durationInMinutes: number;
   refreshSessions: () => void;
   fromHistory?: boolean;
-  teacherId: string;
 };
 
 const SessionPlanCard = ({
@@ -54,7 +53,6 @@ const SessionPlanCard = ({
   refreshSessions,
   fromHistory,
   status,
-  teacherId,
 }: SessionPlanCardProps) => {
   const router = useRouter();
 
