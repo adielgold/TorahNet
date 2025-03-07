@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Footer from "@/components/Footer/footer";
 import FAQ from "@/components/FAQ/faq";
-
+import ImportantUpdateAlert from "@/components/Alert/ImportantUpdateAlert";
 export default function Home() {
   const handleHamburgerClick = () => {
     console.log("Hamburger clicked!");
@@ -55,7 +55,10 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <main className="mx-auto w-full">
-        <section className="container mx-auto flex flex-col items-center gap-8 px-4 py-16 md:flex-row md:py-24">
+        <div className="mx-auto w-full px-4">
+          <ImportantUpdateAlert />
+        </div>
+        <section className="container mx-auto flex flex-col items-center gap-8 px-4 py-16 md:flex-row md:pb-24">
           {/* Text and CTA Section */}
           <motion.div
             className="flex w-full items-center justify-center p-8 text-white md:w-1/2"

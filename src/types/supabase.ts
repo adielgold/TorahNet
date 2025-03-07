@@ -283,6 +283,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_popular_topics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          topic: string
+          count: number
+        }[]
+      }
       get_teacher_review_stats: {
         Args: {
           teacher_id_input: string
@@ -314,10 +321,6 @@ export type Database = {
           avg_rating: number
         }[]
       }
-      get_popular_topics: {
-        Args: {};
-        Returns: {topic: string, count: number}[];
-      };
     }
     Enums: {
       [_ in never]: never

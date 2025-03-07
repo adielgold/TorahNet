@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     const supabase = createClient(req, res);

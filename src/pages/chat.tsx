@@ -46,8 +46,8 @@ const Chat = () => {
 
   if (!token)
     return (
-      <div className="min-h-screen w-full items-center justify-center flex">
-        <Loader className="w-12 h-12 animate-spin text-primary-blue" />
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Loader className="h-12 w-12 animate-spin text-primary-blue" />
       </div>
     );
 

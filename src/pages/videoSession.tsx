@@ -40,37 +40,171 @@ const VideoSession = () => {
   const [session, setSession] = useState<SessionWithUsers | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [endCallTrigger, setEndCallTrigger] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { user } = useUserStore();
-
   const { client: videoClient } = useStreamClient();
-
   const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createClient();
 
-  console.log(user?.role, "User role");
+  console.log("User role:", user?.role);
+  console.log("Query params:", router.query);
+
+  // Set session parameters from URL
+  useEffect(() => {
+    const { sessionId, teacherId, studentId } = router.query;
+
+    if (!sessionId || !teacherId || !studentId) {
+      console.log("Missing required query parameters");
+      setError("Missing required parameters");
+      return;
+    }
+
+    console.log("Setting session parameters:", {
+      sessionId,
+      teacherId,
+      studentId,
+    });
+    setSessionId(sessionId as string);
+    setTeacherId(teacherId as string);
+    setStudentId(studentId as string);
+  }, [router.query]);
+
+  // Fetch session details
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const fetchSession = async () => {
+      try {
+        console.log("Fetching session data for ID:", sessionId);
+        const { data, error } = await supabase
+          .from("sessions")
+          .select("*")
+          .eq("id", sessionId)
+          .single();
+
+        if (error) {
+          console.error("Error fetching session:", error);
+          setError(`Failed to fetch session: ${error.message}`);
+          return;
+        }
+
+        console.log("Session data retrieved:", data);
+        setSession(data as SessionWithUsers);
+      } catch (err) {
+        console.error("Exception in fetchSession:", err);
+        setError(
+          `Exception: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    };
+
+    fetchSession();
+  }, [sessionId]);
+
+  // Initialize video call
+  useEffect(() => {
+    if (!videoClient || !sessionId) return;
+
+    const initializeCall = async () => {
+      try {
+        console.log("Initializing video call for session:", sessionId);
+        setLoading(true);
+
+        const calls = await videoClient.queryCalls({
+          filter_conditions: {
+            id: sessionId,
+            ended_at: null,
+          },
+        });
+
+        console.log("Calls query result:", calls);
+
+        if (calls?.calls?.length > 0) {
+          console.log("Found existing call, joining...");
+          await calls.calls[0].join();
+          setVideoCall(calls.calls[0]);
+        } else {
+          console.log("No active call found for this session");
+          setError("No active call found for this session");
+        }
+      } catch (err) {
+        console.error("Error initializing video call:", err);
+        setError(
+          `Failed to initialize call: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeCall();
+  }, [videoClient, sessionId]);
+
+  // Handle call events
+  useEffect(() => {
+    if (!videoCall) return;
+
+    console.log("Setting up call event handlers");
+    startSessionTimer();
+
+    const handleCallEnd = async () => {
+      console.log("Call ended event triggered");
+      await endCall();
+    };
+
+    const handleCallLeave = async () => {
+      console.log("Participant left event triggered");
+      router.push("/profile/dashboard");
+    };
+
+    videoCall.on("call.ended", handleCallEnd);
+    videoCall.on("participantLeft", handleCallLeave);
+
+    return () => {
+      console.log("Cleaning up call event handlers");
+      videoCall.off("call.ended", handleCallEnd);
+      videoCall.off("participantLeft", handleCallLeave);
+    };
+  }, [videoCall]);
 
   const endCall = async () => {
     try {
+      console.log("Ending call for session:", sessionId);
+
       const { data, error } = await supabase
         .from("sessions")
         .update({ status: "finished" })
         .eq("id", sessionId);
 
       if (error) {
-        throw new Error("Error updating session");
+        console.error("Error updating session status:", error);
+        throw new Error(`Error updating session: ${error.message}`);
       }
 
-      await supabase
+      console.log("Session marked as finished:", data);
+
+      const { data: paymentData, error: paymentError } = await supabase
         .from("payments")
         .update({ status: "completed" })
         .eq("session_id", sessionId);
 
+      if (paymentError) {
+        console.error("Error updating payment status:", paymentError);
+      } else {
+        console.log("Payment marked as completed:", paymentData);
+      }
+
       setEndCallTrigger(true);
 
       if (user?.role === "teacher") {
-        router.replace("/profile/dashboard");
+        console.log("Redirecting teacher to dashboard");
+        router.push("/profile/dashboard");
       } else {
-        router.replace(`/rating?teacherId=${teacherId}&sessionId=${sessionId}`);
+        console.log("Redirecting student to rating page");
+        router.push(`/rating?teacherId=${teacherId}&sessionId=${sessionId}`);
       }
 
       toast({
@@ -79,7 +213,8 @@ const VideoSession = () => {
       });
 
       setVideoCall(null);
-    } catch (error) {
+    } catch (err) {
+      console.error("Failed to end call:", err);
       toast({
         title: "Error",
         description: "Failed to end session. Please try again later",
@@ -88,175 +223,88 @@ const VideoSession = () => {
     }
   };
 
-  const getTotalSessionTime = (durationInMins: number): string => {
-    const minutes = Math.floor(durationInMins);
-    const seconds = Math.floor((durationInMins % 1) * 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
   const startSessionTimer = () => {
+    if (!session?.scheduledAt || !session?.durationInMins) {
+      console.error("Missing session schedule or duration");
+      return;
+    }
+
+    console.log("Starting session timer with:", {
+      scheduledAt: session.scheduledAt,
+      duration: session.durationInMins,
+    });
+
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const scheduledLocalTime = moment
-      .utc(session?.scheduledAt)
-      .tz(userTimeZone);
+    const scheduledLocalTime = moment.utc(session.scheduledAt).tz(userTimeZone);
     const sessionEnd = scheduledLocalTime
       .clone()
-      .add(session?.durationInMins, "minutes");
+      .add(session.durationInMins, "minutes");
+
+    console.log("Session scheduled time:", scheduledLocalTime.format());
+    console.log("Session end time:", sessionEnd.format());
 
     const interval = setInterval(async () => {
       const now = moment().tz(userTimeZone);
 
       if (now.isAfter(sessionEnd)) {
+        console.log("Session time expired, ending call");
         clearInterval(interval);
-        console.log("Session ended. Ending call...");
         await videoCall?.endCall();
       } else {
         const durationLeft = moment.duration(sessionEnd.diff(now));
         setTimeLeft(
           `${durationLeft.minutes()}:${
             durationLeft.seconds() < 10 ? "0" : ""
-          }${durationLeft.seconds()}`
+          }${durationLeft.seconds()}`,
         );
       }
-    }, 1000); // Update every second
+    }, 1000);
+
+    return () => clearInterval(interval);
   };
 
-  const supabase = createClient();
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (
-      !router.query.sessionId ||
-      !router.query.teacherId ||
-      !router.query.studentId
-    )
-      return;
-
-    setSessionId(router.query.sessionId as string);
-    setTeacherId(router.query.teacherId as string);
-    setStudentId(router.query.studentId as string);
-  }, [router.query.sessionId]);
-
-  useEffect(() => {
-    if (!sessionId) return;
-
-    const fetchSession = async () => {
-      const { data, error } = await supabase
-        .from("sessions")
-        .select("*")
-        .eq("id", sessionId)
-        .single();
-
-      if (error) {
-        console.log(error, "Error fetching session");
-        return;
-      }
-
-      setSession(data as SessionWithUsers);
-    };
-    fetchSession();
-  }, [sessionId]);
-
-  const handleFinishClick = () => {
-    setShowRating(true);
-  };
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const { data, error } = await supabase.auth.getSession();
-
-  //     if (error) {
-  //       console.log(error, "Error getting session");
-  //       return;
-  //     }
-
-  //     const { data: axiosData } = await axios.get("/api/getStreamToken");
-
-  //     setToken(axiosData?.token as string);
-  //   })();
-  // }, []);
-
-  // const videoUser: User = {
-  //   id: user?.id!,
-  //   name: user?.name!,
-  //   image: user?.image_url!,
-  // };
-
-  // const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(
-  //   null
-  // );
-
-  // useEffect(() => {
-  //   if (!token) return;
-
-  //   const client = new StreamVideoClient({
-  //     apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY!,
-  //     user: videoUser,
-  //     token: token!,
-  //   });
-  //   setVideoClient(client);
-  // }, [token]);
-
-  useEffect(() => {
-    if (!videoClient) return;
-    (async () => {
-      try {
-        const calls = await videoClient.queryCalls({
-          filter_conditions: {
-            id: sessionId,
-            ended_at: null,
-            // starts_at: {
-            //   $eq: new Date(session?.scheduledAt!).toISOString(),
-            // },
-            // ongoing: true,
-          },
-        });
-
-        if (calls?.calls?.length > 0) {
-          await calls?.calls[0]?.join();
-          setVideoCall(calls?.calls[0]);
-        }
-      } catch (error) {
-        console.log(error, "Error");
-      }
-    })();
-  }, [videoClient, sessionId]);
-
-  useEffect(() => {
-    if (!videoCall) return;
-
-    startSessionTimer();
-
-    const handleCallEnd = async () => {
-      console.log("Call ended");
-      await endCall();
-    };
-
-    const handleCallLeave = async () => {
-      router.back();
-    };
-
-    videoCall?.on("call.ended", handleCallEnd);
-
-    videoCall?.on("participantLeft", handleCallLeave);
-
-    return () => {
-      videoCall?.off("callEnded", handleCallEnd);
-      videoCall?.off("participantLeft", handleCallLeave);
-    };
-  }, [videoCall]);
-
-  if (!videoClient || !videoCall || !sessionId)
+  // Render loading state
+  if (loading) {
     return (
-      <div className="min-h-screen w-full items-center justify-center flex">
-        <Loader className="w-12 h-12 animate-spin text-primary-blue" />
+      <div className="flex min-h-screen w-full flex-col items-center justify-center">
+        <Loader className="mb-4 h-12 w-12 animate-spin text-primary-blue" />
+        <p className="text-gray-600">Initializing video session...</p>
       </div>
     );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center p-4">
+        <div className="max-w-md rounded-lg border border-red-200 bg-red-50 p-6">
+          <h2 className="mb-2 text-xl font-semibold text-red-700">
+            Unable to join video session
+          </h2>
+          <p className="mb-4 text-gray-700">{error}</p>
+          <button
+            onClick={() => router.push("/profile/dashboard")}
+            className="rounded-md bg-primary-blue px-4 py-2 text-white transition-colors hover:bg-blue-700"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Render when client or call is not available
+  if (!videoClient || !videoCall || !sessionId) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center">
+        <Loader className="mb-4 h-12 w-12 animate-spin text-primary-blue" />
+        <p className="text-gray-600">Connecting to video session...</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="w-full h-screen flex flex-col">
-      {/* <StreamVideo client={videoClient}> */}
+    <section className="flex h-screen w-full flex-col">
       <StreamCall call={videoCall}>
         <MyUILayout
           videoCall={videoCall}
@@ -264,8 +312,6 @@ const VideoSession = () => {
           endCall={endCall}
         />
       </StreamCall>
-      {/* </StreamVideo> */}
-      {/* {!showRating ? <Video onFinish={handleFinishClick} /> : <Rating />} */}
     </section>
   );
 };
@@ -286,23 +332,23 @@ export const MyUILayout: React.FC<{
 
   if (callingState !== CallingState.JOINED) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <Loader className="w-12 h-12 animate-spin text-primary-blue" />
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader className="h-12 w-12 animate-spin text-primary-blue" />
       </div>
     );
   }
 
   return (
     <StreamTheme className="text-white">
-      <div className="w-full sm:py-4 sm:px-10 px-4 items-center flex min-h-20 shadowprofile bg-white relative z-20 mb-10">
-        <div className="flex w-full justify-between items-center">
+      <div className="shadowprofile relative z-20 mb-10 flex min-h-20 w-full items-center bg-white px-4 sm:px-10 sm:py-4">
+        <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
                 videoCall?.leave();
                 router.back();
               }}
-              className="bg-primary-blue px-5 h-9 rounded-full text-white text-sm items-center hidden sm:flex"
+              className="hidden h-9 items-center rounded-full bg-primary-blue px-5 text-sm text-white sm:flex"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -324,16 +370,16 @@ export const MyUILayout: React.FC<{
                 onClick={async () => {
                   await videoCall?.endCall();
                 }}
-                className="bg-darkblueui px-5 h-9 rounded-full text-white text-sm items-center hidden sm:flex"
+                className="hidden h-9 items-center rounded-full bg-darkblueui px-5 text-sm text-white sm:flex"
               >
                 End Session
               </button>
             )}
           </div>
-          <div className="ml-10 sm:ml-0 text-black font-bold">{timeLeft}</div>
-          <button className="sm:px-4 sm:py-2 px-3 py-1.5 rounded-full bg-darkblueui flex justify-center items-center sm:mt-4 hover:bg-dark">
-            <FaRegCircleQuestion className="text-sm question-icon" />
-            <span className="text-sm text-white ml-2 font-light">Help</span>
+          <div className="ml-10 font-bold text-black sm:ml-0">{timeLeft}</div>
+          <button className="hover:bg-dark flex items-center justify-center rounded-full bg-darkblueui px-3 py-1.5 sm:mt-4 sm:px-4 sm:py-2">
+            <FaRegCircleQuestion className="question-icon text-sm" />
+            <span className="ml-2 text-sm font-light text-white">Help</span>
           </button>
         </div>
       </div>
