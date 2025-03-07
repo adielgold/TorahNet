@@ -66,7 +66,6 @@ const Profile = () => {
   const [sessions, setSessions] = useState<SessionWithUsers[] | []>([]);
   const [refreshSessions, setRefreshSessions] = useState<boolean>(false);
   const [sessionsLoading, setSessionsLoading] = useState(true);
-
   const { toast } = useToast();
 
   const fetchSessions = async () => {
@@ -123,8 +122,8 @@ const Profile = () => {
 
   return (
     <LayoutWrapper>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
-      <div className="bg-white rounded-lg shadow p-4 mb-6 flex items-center justify-between">
+      <h1 className="mb-6 text-2xl font-bold text-gray-800">Dashboard</h1>
+      <div className="mb-6 flex items-center justify-between rounded-lg bg-white p-4 shadow">
         <p className="text-lg font-semibold text-gray-700">
           Sessions Planned: {sessions?.length}
         </p>
@@ -133,7 +132,7 @@ const Profile = () => {
         </Link>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         <div className="w-full lg:w-2/3">
           {!sessionsLoading && sessions.length > 0 ? (
             <SessionPlan
@@ -142,13 +141,13 @@ const Profile = () => {
             />
           ) : (
             <>
-              <Skeleton className="h-[120px] w-full mt-4" />
-              <Skeleton className="h-[120px] w-full mt-2.5" />
-              <Skeleton className="h-[120px] w-full mt-2.5" />
+              <Skeleton className="mt-4 h-[120px] w-full" />
+              <Skeleton className="mt-2.5 h-[120px] w-full" />
+              <Skeleton className="mt-2.5 h-[120px] w-full" />
             </>
           )}
         </div>
-        <div className="w-full lg:w-1/3 space-y-6">
+        <div className="w-full space-y-6 lg:w-1/3">
           <Card>
             <CardHeader>
               <CardTitle>Liked Articles</CardTitle>

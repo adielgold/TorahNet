@@ -53,6 +53,7 @@ const SessionPlanCard = ({
   refreshSessions,
   fromHistory,
   status,
+  teacherId,
 }: SessionPlanCardProps) => {
   const router = useRouter();
 
@@ -78,7 +79,7 @@ const SessionPlanCard = ({
           sessionId: id,
           startsAt,
           scheduledAt: data.dateTime,
-        }
+        },
       );
 
       setIsRescheduleDialogOpen(false);
@@ -121,9 +122,10 @@ const SessionPlanCard = ({
 
   const onCancelSession = async () => {
     try {
-      const { data } = await axios.post("/api/stripe/refund", {
+      const { data } = await axios.post("/api/paypal/payments/refund", {
         sessionId: id,
       });
+
       toast({
         title: "Session Cancelled",
         description: data?.message,
@@ -157,11 +159,11 @@ const SessionPlanCard = ({
                 <AvatarImage src={image ?? ""} alt={title} />
                 <AvatarFallback>{title?.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-gray-900">
                   {title}
                 </p>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="truncate text-sm text-gray-500">
                   {formattedStartDate} - {formattedEndDate}
                 </p>
               </div>
@@ -183,9 +185,9 @@ const SessionPlanCard = ({
                 <Link href={`/chat?channel=${userId}`}>
                   <Button
                     size="sm"
-                    className="bg-[#1e1e4a] text-white hover:bg-[#2a2a5a] "
+                    className="bg-[#1e1e4a] text-white hover:bg-[#2a2a5a]"
                   >
-                    <User className="h-4 w-4 mr-2" />
+                    <User className="mr-2 h-4 w-4" />
                     <span>Go to Chat</span>
                   </Button>
                 </Link>
@@ -201,14 +203,14 @@ const SessionPlanCard = ({
                 <AvatarImage src={image ?? ""} alt={title} />
                 <AvatarFallback>{title?.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-gray-900">
                   {title}
                 </p>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="truncate text-sm text-gray-500">
                   {formattedStartDate}
                 </p>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="truncate text-sm text-gray-500">
                   {formattedEndDate}
                 </p>
               </div>
@@ -218,7 +220,7 @@ const SessionPlanCard = ({
                   className="bg-[#1e1e4a] text-white hover:bg-[#2a2a5a]"
                   onClick={() => {}}
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="mr-2 h-4 w-4" />
                   Chat
                 </Button>
               </Link>
@@ -239,17 +241,17 @@ const SessionPlanCard = ({
               </Button>
             </div> */}
           </CardContent>
-          <CardFooter className="bg-gray-50 p-4 flex justify-end space-x-2">
+          <CardFooter className="flex justify-end space-x-2 bg-gray-50 p-4">
             <Button
               variant="outline"
-              className="text-[#1e1e4a] border-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white"
+              className="border-[#1e1e4a] text-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white"
               onClick={() => setIsCancelDialogOpen(true)}
             >
               Cancel Session
             </Button>
             <Button
               variant="outline"
-              className="text-[#1e1e4a] border-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white"
+              className="border-[#1e1e4a] text-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white"
               onClick={() => setIsRescheduleDialogOpen(true)}
             >
               Reschedule Session
@@ -351,13 +353,13 @@ const SessionPlanCard = ({
         //   </DialogContent>
         // </Dialog>
 
-        <div className="fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 ">
+        <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center">
           <div
-            className="absolute w-full h-full bg-gray-900 opacity-50 "
+            className="absolute h-full w-full bg-gray-900 opacity-50"
             onClick={() => setIsRescheduleDialogOpen(false)}
           ></div>
 
-          <Card className="z-50 ">
+          <Card className="z-50">
             <CardContent className="sm:max-w-[425px]">
               <CardHeader className="px-0">
                 <CardTitle>Reschedule Session</CardTitle>
@@ -412,7 +414,7 @@ const SessionPlanCard = ({
               <DialogTitle>Cancel Session</DialogTitle>
               <DialogDescription>
                 Are sure you want to cancel this meeting?
-                <span className="text-red-500 block text-xs mt-1">
+                <span className="mt-1 block text-xs text-red-500">
                   Please note: cancellations made within 24 hours of the session
                   will be fully charged.
                 </span>

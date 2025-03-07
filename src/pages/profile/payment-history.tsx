@@ -86,9 +86,12 @@ export default function PaymentHistory() {
   const onSubmit: SubmitHandler<WithDrawalFormProps> = async (data) => {
     // Handle the form submission
     try {
-      const { data: transferData } = await axios.post("/api/stripe/transfer", {
-        amount: +data.amount,
-      });
+      const { data: transferData } = await axios.post(
+        "/api/paypal/payments/transfer",
+        {
+          amount: +data.amount,
+        },
+      );
 
       setDialogOpen(false);
       toast({
@@ -107,20 +110,20 @@ export default function PaymentHistory() {
     <>
       {user?.role === "teacher" ? (
         <NavbarWrapper>
-          <div className="container mx-auto p-6 space-y-8">
+          <div className="container mx-auto space-y-8 p-6">
             <div className="grid gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-2xl font-bold">
                     Current Balance
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
                     ${paymentData?.remainingBalance}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Available for withdrawal
                   </p>
                 </CardContent>
@@ -131,13 +134,13 @@ export default function PaymentHistory() {
                   <CardTitle className="text-xl font-bold">
                     Payment For Active Sessions
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold mt-2">
+                  <div className="mt-2 text-3xl font-bold">
                     ${paymentData?.totalAmountOnHold}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Payments for {paymentData?.totalAmoundOnHoldLength} for
                     active sessions
                   </p>
@@ -149,13 +152,13 @@ export default function PaymentHistory() {
                   <CardTitle className="text-xl font-bold">
                     Total Withdrawn till date
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold mt-2">
+                  <div className="mt-2 text-3xl font-bold">
                     ${paymentData?.totalWithdrawnAmount}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Total amount withdrawn till date
                   </p>
                 </CardContent>
@@ -166,13 +169,13 @@ export default function PaymentHistory() {
                   <CardTitle className="text-2xl font-bold">
                     Quick Actions
                   </CardTitle>
-                  <DollarSign className="h-6 w-6 text-muted-foreground" />
+                  <DollarSign className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild onClick={() => setDialogOpen(true)}>
                       <Button
-                        className="w-full mt-2 bg-primary-blue"
+                        className="mt-2 w-full bg-primary-blue"
                         size="lg"
                         disabled={paymentData?.remainingBalance < 50}
                       >
@@ -262,10 +265,10 @@ export default function PaymentHistory() {
                         <TableCell
                           className={
                             payment?.status === "refunded"
-                              ? "text-red-500 font-bold"
+                              ? "font-bold text-red-500"
                               : payment?.status === "onhold"
-                              ? "text-primary-blue font-bold"
-                              : "text-green-500 font-bold"
+                                ? "font-bold text-primary-blue"
+                                : "font-bold text-green-500"
                           }
                         >
                           ${Math.abs(payment.teacher_amount).toFixed(2)}
@@ -277,8 +280,8 @@ export default function PaymentHistory() {
                               payment?.status === "refunded"
                                 ? "bg-red-500"
                                 : payment?.status === "onhold"
-                                ? "bg-primary-blue"
-                                : "bg-green-500"
+                                  ? "bg-primary-blue"
+                                  : "bg-green-500"
                             }
                           >
                             {payment?.status === "onhold"
@@ -287,7 +290,7 @@ export default function PaymentHistory() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span className="text-primary-blue font-medium">
+                          <span className="font-medium text-primary-blue">
                             {payment?.status === "refunded"
                               ? "-"
                               : payment.timeLeft}
@@ -321,15 +324,15 @@ export default function PaymentHistory() {
                         <TableRow key={withdrawal?.id}>
                           <TableCell>
                             {new Date(
-                              withdrawal?.created_at
+                              withdrawal?.created_at,
                             ).toLocaleDateString()}
                           </TableCell>
 
                           <TableCell
                             className={
                               withdrawal?.amount > 0
-                                ? "text-red-600 font-bold"
-                                : "text-blue-600 font-bold"
+                                ? "font-bold text-red-600"
+                                : "font-bold text-blue-600"
                             }
                           >
                             -${withdrawal?.amount.toFixed(2)}
@@ -340,7 +343,7 @@ export default function PaymentHistory() {
                             </span>
                           </TableCell>
                         </TableRow>
-                      )
+                      ),
                     )}
                   </TableBody>
                 </Table>
@@ -350,20 +353,20 @@ export default function PaymentHistory() {
         </NavbarWrapper>
       ) : (
         <NavbarWrapper>
-          <div className="container mx-auto p-6 space-y-8">
+          <div className="container mx-auto space-y-8 p-6">
             <div className="grid gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-2xl font-bold">
                     Total Spent
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
                     ${paymentData?.totalSpent}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Total amount spent on sessions
                   </p>
                 </CardContent>
@@ -374,13 +377,13 @@ export default function PaymentHistory() {
                   <CardTitle className="text-xl font-bold">
                     Payment For Active Sessions
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold mt-2">
+                  <div className="mt-2 text-3xl font-bold">
                     ${paymentData?.totalAmountOnHold}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Payments for {paymentData?.totalAmoundOnHoldLength} for
                     active sessions
                   </p>
@@ -392,13 +395,13 @@ export default function PaymentHistory() {
                   <CardTitle className="text-xl font-bold">
                     Total Amount Refunded
                   </CardTitle>
-                  <WalletIcon className="h-6 w-6 text-muted-foreground" />
+                  <WalletIcon className="text-muted-foreground h-6 w-6" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold mt-2">
+                  <div className="mt-2 text-3xl font-bold">
                     ${paymentData?.totalAmountRefunded}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Excluding 5% platform fee
                   </p>
                 </CardContent>
@@ -434,10 +437,10 @@ export default function PaymentHistory() {
                         <TableCell
                           className={
                             payment?.status === "refunded"
-                              ? "text-yellow-500 font-bold"
+                              ? "font-bold text-yellow-500"
                               : payment?.status === "onhold"
-                              ? "text-primary-blue font-bold"
-                              : "text-green-500 font-bold"
+                                ? "font-bold text-primary-blue"
+                                : "font-bold text-green-500"
                           }
                         >
                           ${Math.abs(payment?.amount).toFixed(2)}
@@ -449,8 +452,8 @@ export default function PaymentHistory() {
                               payment?.status === "refunded"
                                 ? "bg-yellow-500"
                                 : payment?.status === "onhold"
-                                ? "bg-primary-blue"
-                                : "bg-green-500"
+                                  ? "bg-primary-blue"
+                                  : "bg-green-500"
                             }
                           >
                             {payment?.status === "onhold"
