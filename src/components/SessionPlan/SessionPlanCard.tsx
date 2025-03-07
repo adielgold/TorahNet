@@ -41,6 +41,7 @@ type SessionPlanCardProps = {
   durationInMinutes: number;
   refreshSessions: () => void;
   fromHistory?: boolean;
+  teacherId: string;
 };
 
 const SessionPlanCard = ({
@@ -125,13 +126,11 @@ const SessionPlanCard = ({
       const { data } = await axios.post("/api/paypal/payments/refund", {
         sessionId: id,
       });
-
       toast({
         title: "Session Cancelled",
         description: data?.message,
       });
       setIsCancelDialogOpen(false);
-
       refreshSessions();
     } catch (error: any) {
       toast({

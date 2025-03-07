@@ -85,25 +85,24 @@ export default function PaymentHistory() {
 
   const onSubmit: SubmitHandler<WithDrawalFormProps> = async (data) => {
     // Handle the form submission
-    try {
-      const { data: transferData } = await axios.post(
-        "/api/paypal/payments/transfer",
-        {
-          amount: +data.amount,
-        },
-      );
-
-      setDialogOpen(false);
-      toast({
-        title: "Success",
-        description: transferData?.message,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error?.response?.data?.error ?? "An error occurred",
-      });
-    }
+    // try {
+    //   const { data: transferData } = await axios.post(
+    //     "/api/paypal/payments/transfer",
+    //     {
+    //       amount: +data.amount,
+    //     },
+    //   );
+    //   setDialogOpen(false);
+    //   toast({
+    //     title: "Success",
+    //     description: transferData?.message,
+    //   });
+    // } catch (error: any) {
+    //   toast({
+    //     title: "Error",
+    //     description: error?.response?.data?.error ?? "An error occurred",
+    //   });
+    // }
   };
 
   return (

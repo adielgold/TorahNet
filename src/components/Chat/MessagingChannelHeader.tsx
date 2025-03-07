@@ -125,16 +125,8 @@ const MessagingChannelHeader: React.FC = () => {
 
       setIsDialogOpen(false);
 
-      // toast({
-      //   title: "Session Booked",
-      //   description: "Session has been booked successfully",
-      // });
-      // router.push(
-      //   `/checkout?sessionId=${sessionData.id}&studentId=${sessionData.student_id}&teacherId=${sessionData.teacher_id}&amount=${sessionData.teacher?.[0]?.payment_details?.hourly_rate}`
-      // );
-
       try {
-        const response = await fetch("/api/paypal/payments/create-order", {
+        const response = await fetch("/api/mockpayment/create-order", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -145,17 +137,46 @@ const MessagingChannelHeader: React.FC = () => {
         });
 
         const data = await response.json();
-
-        if (data.approveUrl) {
-          window.location.href = data.approveUrl;
-          // Or if using Next.js router:
-          // router.push(data.approveUrl);
-        } else if (data.payerActionUrl) {
-          window.location.href = data.payerActionUrl;
-        }
+        console.log(data, "Data");
       } catch (error) {
         console.error("Error creating PayPal order:", error);
       }
+
+      // need to remove if PayPal or other payment methods are implemented
+      setIsPlanDialogOpen(false);
+
+      toast({
+        title: "Session Booked",
+        description: "Session has been booked successfully",
+      });
+      // router.push(
+      //   `/checkout?sessionId=${sessionData.id}&studentId=${sessionData.student_id}&teacherId=${sessionData.teacher_id}&amount=${sessionData.teacher?.[0]?.payment_details?.hourly_rate}`,
+      // );
+
+      // Paypal Implementation
+      // try {
+      //   const response = await fetch("/api/paypal/payments/create-order", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       sessionId: sessionData.id,
+      //     }),
+      //   });
+
+      //   const data = await response.json();
+
+      //   if (data.approveUrl) {
+      //     window.location.href = data.approveUrl;
+      //     // Or if using Next.js router:
+      //     // router.push(data.approveUrl);
+      //   } else if (data.payerActionUrl) {
+      //     window.location.href = data.payerActionUrl;
+      //   }
+      // } catch (error) {
+      //   console.error("Error creating PayPal order:", error);
+      // }
     }
   };
 
@@ -198,51 +219,53 @@ const MessagingChannelHeader: React.FC = () => {
     fetchExistingSession();
   }, []);
 
-  const paymentProcessed = useRef(false);
+  //paypal implementation
 
-  useEffect(() => {
-    const { token, PayerID, payment, sessionId, teacherId, studentId } =
-      router.query;
+  // const paymentProcessed = useRef(false);
 
-    if (token && PayerID && payment === "true" && !paymentProcessed.current) {
-      const handlePayment = async () => {
-        try {
-          paymentProcessed.current = true;
+  // useEffect(() => {
+  //   const { token, PayerID, payment, sessionId, teacherId, studentId } =
+  //     router.query;
 
-          const { success, data, error } = await capturePaypalPayment(
-            token as string,
-            sessionId as string,
-            teacherId as string,
-            studentId as string,
-          );
+  //   if (token && PayerID && payment === "true" && !paymentProcessed.current) {
+  //     const handlePayment = async () => {
+  //       try {
+  //         paymentProcessed.current = true;
 
-          if (success) {
-            localStorage.setItem(`payment_${token}`, "captured");
+  //         const { success, data, error } = await capturePaypalPayment(
+  //           token as string,
+  //           sessionId as string,
+  //           teacherId as string,
+  //           studentId as string,
+  //         );
 
-            toast({
-              title: "Payment Successful!",
-              description: "Your payment has been processed successfully.",
-              variant: "default",
-            });
-            console.log(data, "Data");
-          } else {
-            toast({
-              title: "Payment Failed",
-              description:
-                typeof error === "string"
-                  ? error
-                  : "There was an error processing your payment.",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error("Payment capture error:", error);
-        }
-      };
+  //         if (success) {
+  //           localStorage.setItem(`payment_${token}`, "captured");
 
-      handlePayment();
-    }
-  }, [router.query]);
+  //           toast({
+  //             title: "Payment Successful!",
+  //             description: "Your payment has been processed successfully.",
+  //             variant: "default",
+  //           });
+  //           console.log(data, "Data");
+  //         } else {
+  //           toast({
+  //             title: "Payment Failed",
+  //             description:
+  //               typeof error === "string"
+  //                 ? error
+  //                 : "There was an error processing your payment.",
+  //             variant: "destructive",
+  //           });
+  //         }
+  //       } catch (error) {
+  //         console.error("Payment capture error:", error);
+  //       }
+  //     };
+
+  //     handlePayment();
+  //   }
+  // }, [router.query]);
 
   return (
     <div className="flex min-h-[80px] items-center justify-between px-5">

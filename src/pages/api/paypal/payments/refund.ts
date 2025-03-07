@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import createClient from "@/utils/supabase/api";
-import { getPayPalAccessToken } from "@/lib/paypalAccessToken";
+// import { getPayPalAccessToken } from "@/lib/paypalAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -44,8 +44,8 @@ export default async function handler(
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
     }
-
-    const accessToken = await getPayPalAccessToken(teacher?.stripe_account_id);
+    //uncomment after paypal or any other payment method is implemented
+    // const accessToken = await getPayPalAccessToken(teacher?.stripe_account_id);
 
     // Validate cancellation timing
     const bookingTime = new Date(payment.created_at).getTime();
@@ -58,34 +58,36 @@ export default async function handler(
           "Refund not eligible. Cancellation must occur within 24 hours of booking. Please contact support for assistance.",
       });
     }
-
+    //uncomment after paypal or any other payment method is implemented
     // Initiate PayPal refund
-    const response = await fetch(
-      `${process.env.PAYPAL_BASE_URL}/v2/payments/captures/${payment.payment_intent_id}/refund`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          amount: {
-            value: (Math.round(payment.amount * 0.95 * 100) / 100).toString(),
-            currency_code: "USD",
-          },
-        }),
-      },
-    );
+    // const response = await fetch(
+    //   `${process.env.PAYPAL_BASE_URL}/v2/payments/captures/${payment.payment_intent_id}/refund`,
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${accessToken}`,
+    //     },
+    //     body: JSON.stringify({
+    //       amount: {
+    //         value: (Math.round(payment.amount * 0.95 * 100) / 100).toString(),
+    //         currency_code: "USD",
+    //       },
+    //     }),
+    //   },
+    // );
 
-    const refundData = await response.json();
+    // const refundData = await response.json();
 
-    console.log(refundData, "refundData");
+    // console.log(refundData, "refundData");
 
-    if (!response.ok) {
-      throw new Error(
-        `PayPal Error: ${refundData.message || "Unknown error"} (Debug ID: ${refundData.debug_id})`,
-      );
-    }
+    // if (!response.ok) {
+    //   throw new Error(
+    //     `PayPal Error: ${refundData.message || "Unknown error"} (Debug ID: ${refundData.debug_id})`,
+    //   );
+    // }
+
+    const mockRefundId = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     await supabase
       .from("sessions")
@@ -94,8 +96,14 @@ export default async function handler(
 
     await supabase
       .from("payments")
-      .update({ status: "refunded", refund_id: refundData.id })
+      .update({ status: "refunded", refund_id: mockRefundId })
       .eq("session_id", sessionId);
+
+    // uncomment after paypal or any other payment method is implemented
+    // await supabase
+    // .from("payments")
+    // .update({ status: "refunded", refund_id: refundData.id })
+    // .eq("session_id", sessionId);
 
     res.status(200).json({
       success: true,

@@ -36,7 +36,6 @@
     "@supabase/supabase-js": "^2.44.3",
     "@types/react-input-mask": "^3.0.5",
     "@types/validator": "^13.12.0",
-    "ag-charts-react": "^11.1.0",
     "axios": "^1.7.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

@@ -440,11 +440,11 @@ const Settings = () => {
                 </Badge>
               ))}
             </div>
-            {user?.role === "teacher" && (
+            {/* {user?.role === "teacher" && (
               <>
                 <CardTitle className="pt-4">Payment Details</CardTitle>
                 <div>
-                  {/* <Label htmlFor="hourlyFee">Hourly Fee ($)</Label> */}
+// Originally commented out {<Label htmlFor="hourlyFee">Hourly Fee ($)</Label>}
                   <ValidateInput
                     control={control}
                     name="hourly_rate"
@@ -499,7 +499,7 @@ const Settings = () => {
                   hour.
                 </p>
               </>
-            )}
+            )} */}
           </CardContent>
         </Card>
         {/* </form> */}

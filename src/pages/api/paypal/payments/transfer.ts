@@ -81,66 +81,81 @@ export default async function handler(
       return res.status(400).json({ error: "Insufficient funds" });
     }
 
+    //uncomment after paypal or any other payment method is implemented
+
     // Get PayPal access token
-    const accessToken = await getPayPalAccessToken();
-    console.log("PayPal Access Token Obtained");
+    // const accessToken = await getPayPalAccessToken();
+    // console.log("PayPal Access Token Obtained");
 
-    // Create PayPal payout
-    const response = await fetch(
-      `${process.env.PAYPAL_BASE_URL}/v1/payments/payouts`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          sender_batch_header: {
-            sender_batch_id: `PAYOUT_${Date.now()}`,
-            email_subject: "You have a payout!",
-            email_message:
-              "You have received a payout for your teaching sessions",
-          },
-          items: [
-            {
-              recipient_type: "PAYPAL_ID",
-              amount: {
-                value: amount,
-                currency: "USD",
-              },
-              receiver: paymentDetailsData?.stripe_account_id,
-              note: "Payout for teaching sessions",
-              sender_item_id: `PAYOUT_ITEM_${Date.now()}`,
-            },
-          ],
-        }),
-      },
-    );
+    // // Create PayPal payout
+    // const response = await fetch(
+    //   `${process.env.PAYPAL_BASE_URL}/v1/payments/payouts`,
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${accessToken}`,
+    //     },
+    //     body: JSON.stringify({
+    //       sender_batch_header: {
+    //         sender_batch_id: `PAYOUT_${Date.now()}`,
+    //         email_subject: "You have a payout!",
+    //         email_message:
+    //           "You have received a payout for your teaching sessions",
+    //       },
+    //       items: [
+    //         {
+    //           recipient_type: "PAYPAL_ID",
+    //           amount: {
+    //             value: amount,
+    //             currency: "USD",
+    //           },
+    //           receiver: paymentDetailsData?.stripe_account_id,
+    //           note: "Payout for teaching sessions",
+    //           sender_item_id: `PAYOUT_ITEM_${Date.now()}`,
+    //         },
+    //       ],
+    //     }),
+    //   },
+    // );
 
-    const payoutData = await response.json();
-    console.log("PayPal Payout Response:", {
-      status: response.status,
-      data: payoutData,
-    });
+    // const payoutData = await response.json();
+    // console.log("PayPal Payout Response:", {
+    //   status: response.status,
+    //   data: payoutData,
+    // });
 
-    if (!response.ok) {
-      console.error("PayPal Payout Failed:", payoutData);
-      return res.status(response.status).json({
-        error: "Failed to initiate transfer",
-        details: payoutData,
-      });
-    }
+    // if (!response.ok) {
+    //   console.error("PayPal Payout Failed:", payoutData);
+    //   return res.status(response.status).json({
+    //     error: "Failed to initiate transfer",
+    //     details: payoutData,
+    //   });
+    // }
 
-    // Update payments as paid out
+    const mockPayoutId = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
     const { error: updateError } = await supabase
       .from("payments")
       .update({
         status: "completed",
-        transfer_id: payoutData.batch_header.payout_batch_id,
+        transfer_id: mockPayoutId,
         amount: amount,
         teacher_id: data?.user?.id,
       })
       .select("*");
+
+    //uncomment after paypal or any other payment method is implemented
+    // Update payments as paid out
+    // const { error: updateError } = await supabase
+    //   .from("payments")
+    //   .update({
+    //     status: "completed",
+    //     transfer_id: payoutData.batch_header.payout_batch_id,
+    //     amount: amount,
+    //     teacher_id: data?.user?.id,
+    //   })
+    //   .select("*");
 
     console.log("Payments Update:", {
       count: paymentsData.length,
@@ -150,7 +165,7 @@ export default async function handler(
     res.status(200).json({
       message:
         "Transfer Initiated. Funds will be transferred to your account shortly",
-      payout: payoutData,
+      payout: mockPayoutId,
     });
   } catch (error: any) {
     console.error("Transfer Error:", {
