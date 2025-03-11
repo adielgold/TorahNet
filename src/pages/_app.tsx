@@ -14,17 +14,17 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <StreamProvider>
-      <PayPalScriptProvider
+      {/* <PayPalScriptProvider
         options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID! }}
-      >
-        <main className={`m-auto flex w-full flex-col ${poppins.className}`}>
-          <Toaster />
-          <ShadcnToaster />
-          <ClientWrapper>
-            <Component {...pageProps} />{" "}
-          </ClientWrapper>
-        </main>
-      </PayPalScriptProvider>
+      > */}
+      <main className={`m-auto flex w-full flex-col ${poppins.className}`}>
+        <Toaster />
+        <ShadcnToaster />
+        <ClientWrapper>
+          <Component {...pageProps} />{" "}
+        </ClientWrapper>
+      </main>
+      {/* </PayPalScriptProvider> */}
     </StreamProvider>
   );
 }

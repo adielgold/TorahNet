@@ -333,15 +333,23 @@ const Settings = () => {
                 onChange={uploadFile}
                 accept="image/*"
               />
-              <Avatar
-                className="h-32 w-32 cursor-pointer"
+              <div
+                className="border-dashed-styled relative rounded-full p-2"
                 onClick={() => inputRef?.current?.click()}
               >
-                <AvatarImage src={user?.image_url!} alt={user?.name!} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
+                <Avatar className="h-32 w-32 cursor-pointer">
+                  <AvatarImage src={user?.image_url!} alt={user?.name!} />
+                  <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-3 right-[50px]">
+                  <Button className="h-10 w-10 rounded-full border border-white bg-darkblueui p-0">
+                    <Camera className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
               <div className="flex-1 text-center md:text-left">
                 <h1 className="mb-2 text-3xl font-bold">{user?.name}</h1>
+                <h1 className="mb-2 text-sm text-gray-600">{user?.bio}</h1>
                 <p className="mb-4 text-gray-600">{user?.expertise}</p>
                 <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
                   {selectedTopics?.map((topic, index) => (
@@ -419,16 +427,13 @@ const Settings = () => {
               {topics?.map((topic, index) => (
                 <Badge
                   key={index}
-                  // variant={
-                  //   selectedTopics?.includes(topic) ? "default" : "outline"
-                  // }
                   className={`p-2 ${
                     isEditing
-                      ? "cursor-pointer hover:bg-[#2a2a5a] hover:text-white"
+                      ? "cursor-pointer hover:bg-blueui hover:text-white"
                       : "cursor-auto hover:bg-white"
                   } ${
                     selectedTopics?.includes(topic) && isEditing
-                      ? "bg-[#2a2a5a]"
+                      ? "bg-blueui text-white"
                       : "border border-blueui bg-white text-blueui"
                   }`}
                   onClick={() => isEditing && toggleTopic(topic)}

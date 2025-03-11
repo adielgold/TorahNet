@@ -88,7 +88,11 @@ const Signin: React.FC = () => {
           token: data.token,
         });
         setLoading(false);
-        router.push("/profile/dashboard");
+        router.push(
+          userData.role === "admin"
+            ? "/profile/admin/dashboard"
+            : "/profile/dashboard",
+        );
       }
     }
   };
