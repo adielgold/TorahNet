@@ -335,7 +335,7 @@ export default function Home() {
               </div>
 
               {/* Step 5 */}
-              <div className="relative flex flex-col items-center justify-center rounded-3xl p-6">
+              {/* <div className="relative flex flex-col items-center justify-center rounded-3xl p-6">
                 <div className="relative mb-4 h-48 w-48">
                   <Image
                     src="/step-5-how-it-works.png"
@@ -350,14 +350,12 @@ export default function Home() {
                 <p className="mb-4 text-xl font-bold text-blue-900">
                   Pay securely via Stripe
                 </p>
-                {/* Horizontal Arrow */}
                 <div className="absolute right-[-30px] top-1/2 hidden -translate-y-1/2 transform md:block">
                   <div className="h-1 w-12 bg-blue-500"></div>
                   <div className="h-0 w-0 border-l-4 border-r-4 border-b-transparent border-r-blue-500 border-t-transparent"></div>
                 </div>
-                {/* Vertical Arrow */}
                 <div className="mx-auto block h-10 w-1 bg-blue-500 md:hidden"></div>
-              </div>
+              </div> */}
 
               {/* Step 6 */}
               <div className="relative flex flex-col items-center justify-center rounded-3xl p-6">
@@ -370,7 +368,7 @@ export default function Home() {
                   />
                 </div>
                 <h3 className="mb-2 bg-gray-800 px-2 py-1 text-sm text-slate-50">
-                  Step 6
+                  Step 5
                 </h3>
                 <p className="mb-4 text-xl font-bold text-blue-900">
                   Join your lesson!

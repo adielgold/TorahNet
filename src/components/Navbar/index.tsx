@@ -14,6 +14,7 @@ import {
   CreditCard,
   Settings,
   LogOut,
+  TowerControl,
   Menu,
   HelpCircle,
   Search,
@@ -23,17 +24,7 @@ import { useUserStore } from "@/stores/userStore";
 import { StreamChat } from "stream-chat";
 import MessagingSidebar from "../Chat/MessagingSidebar";
 import Image from "next/image";
-
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/profile/dashboard" },
-  { icon: History, label: "Session History", href: "/profile/session-history" },
-  // {
-  //   icon: CreditCard,
-  //   label: "Payment History",
-  //   href: "/profile/payment-history",
-  // },
-  { icon: Settings, label: "Settings", href: "/profile/settings" },
-];
+import { Badge } from "../ui/badge";
 
 export default function NavbarWrapper({
   children,
@@ -53,6 +44,50 @@ export default function NavbarWrapper({
     process.env.NEXT_PUBLIC_STREAM_API_KEY!,
   );
 
+  const menuItems =
+    user?.role === "admin"
+      ? [
+          {
+            icon: LayoutDashboard,
+            label: "Dashboard",
+            href: "/profile/admin/dashboard",
+          },
+          {
+            icon: TowerControl,
+            label: "Resolution Center",
+            href: "/profile/admin/resolution-center",
+          },
+          {
+            icon: CreditCard,
+            label: "Payments",
+            href: "/profile/admin/payments",
+          },
+          { icon: User, label: "Users", href: "/profile/admin/users" },
+          {
+            icon: Settings,
+            label: "Settings",
+            href: "/profile/admin/settings",
+          },
+        ]
+      : [
+          {
+            icon: LayoutDashboard,
+            label: "Dashboard",
+            href: "/profile/dashboard",
+          },
+          {
+            icon: History,
+            label: "Session History",
+            href: "/profile/session-history",
+          },
+          // {
+          //   icon: CreditCard,
+          //   label: "Payment History",
+          //   href: "/profile/payment-history",
+          // },
+          { icon: Settings, label: "Settings", href: "/profile/settings" },
+        ];
+
   return (
     <div className="flex h-screen flex-col">
       <header className="flex h-16 items-center border-b bg-white px-4 py-4 lg:px-6">
@@ -71,6 +106,15 @@ export default function NavbarWrapper({
               <MessagingSidebar isMobile />
             ) : (
               <nav className="mt-10 flex flex-col gap-1 p-4">
+                <div className="mb-4 flex items-center justify-between text-lg font-semibold">
+                  Profile
+                  <Badge
+                    variant="outline"
+                    className="bg-white capitalize text-darkblueui"
+                  >
+                    {user?.role}
+                  </Badge>
+                </div>
                 {menuItems.map((item, index) => (
                   <Link
                     key={index}
@@ -112,7 +156,11 @@ export default function NavbarWrapper({
           </Link>
           <div className="flex-1" />
           <Link
-            href="/profile/dashboard"
+            href={
+              user?.role === "admin"
+                ? "/profile/admin/dashboard"
+                : "/profile/dashboard"
+            }
             className={`flex items-center space-x-2 rounded-full px-3 py-2 text-gray-600 ${
               pathname?.startsWith("/profile")
                 ? "bg-blueui text-white"
@@ -170,7 +218,15 @@ export default function NavbarWrapper({
         ) : pathname?.includes("/search") ? null : (
           <aside className="hidden w-64 bg-[#1e1e4a] text-white lg:block">
             <nav className="flex flex-col gap-1 p-4">
-              <div className="mb-4 text-lg font-semibold">Profile</div>
+              <div className="mb-4 flex items-center justify-between text-lg font-semibold">
+                Profile
+                <Badge
+                  variant="outline"
+                  className="bg-white capitalize text-darkblueui"
+                >
+                  {user?.role}
+                </Badge>
+              </div>
               {menuItems.map((item, index) => (
                 <Link
                   key={index}
