@@ -10,9 +10,9 @@ type Reviews = Tables<"reviews">;
 
 type Payments = Tables<"payments">;
 
-type SearchUserData = Omit<User,'created_at' | 'country'> & {
-  hourly_rate: number | null 
-  avg_rating: number | null
+type SearchUserData = Omit<User, "created_at" | "country"> & {
+  hourly_rate: number | null;
+  avg_rating: number | null;
 };
 
 type SessionWithUsers = Session & {
@@ -25,6 +25,28 @@ interface UpdateUserData {
   bio: string;
   topics: string[]; // Assuming selectedTopics is already defined somewhere
   expertise?: string; // Marking expertise as optional
+}
+
+// Google Analytics types
+interface Window {
+  gtag: (
+    type: string,
+    trackingId: string,
+    config?: { [key: string]: any },
+  ) => void;
+  dataLayer: any[];
+}
+
+// Extend the Window interface
+declare global {
+  interface Window {
+    gtag: (
+      type: string,
+      trackingId: string,
+      config?: { [key: string]: any },
+    ) => void;
+    dataLayer: any[];
+  }
 }
 
 export type {
