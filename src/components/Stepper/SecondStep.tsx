@@ -12,14 +12,19 @@ const SecondStep: React.FC<StepProps> = ({
   steps,
   currentStep,
 }) => {
-  const [topics, setTopics] = useState<string[]>([
-    "Laudantium Non Provident",
-    "Quis Porro Est",
-    "Voluptatibus Enim",
-    "Lorem Ipsum",
-    "Dolor Sit Amet",
-    "Conseteur Amis",
-  ]);
+  const topics = [
+    "Hebrew Bible (Tanakh/Torah)",
+    "Talmud (Gemara)",
+    "Jewish Mysticism (Kabbalah)",
+    "Jewish Law (Halakha)",
+    "Jewish Ethics & Philosophy",
+    "Jewish History",
+    "Hebrew",
+    "Mentorship",
+    "Business & Leadership",
+    "Relationships & Marriage",
+  ];
+
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
   const { profileSetup, setProfileSetup } = useProfileSetupStore();

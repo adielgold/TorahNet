@@ -30,6 +30,7 @@ import {
 } from "../ui/dialog";
 import axios from "axios";
 import { Badge } from "../ui/badge";
+import ToasterTitle from "../ui/toaster-title";
 
 type SessionPlanCardProps = {
   title: string;
@@ -84,14 +85,16 @@ const SessionPlanCard = ({
       setIsRescheduleDialogOpen(false);
 
       toast({
-        title: "Session Rescheduled",
+        title: <ToasterTitle title="Session Rescheduled" type="success" />,
         description: rescheduleData?.message,
       });
 
       refreshSessions();
     } catch (error) {
       toast({
-        title: "Rescheduling Session Failed",
+        title: (
+          <ToasterTitle title="Rescheduling Session Failed" type="error" />
+        ),
         description: "Failed to Reschedule the session. Please try again later",
         variant: "destructive",
       });
@@ -125,14 +128,14 @@ const SessionPlanCard = ({
         sessionId: id,
       });
       toast({
-        title: "Session Cancelled",
+        title: <ToasterTitle title="Session Cancelled" type="success" />,
         description: data?.message,
       });
       setIsCancelDialogOpen(false);
       refreshSessions();
     } catch (error: any) {
       toast({
-        title: "Cancelling Session Failed",
+        title: <ToasterTitle title="Cancelling Session Failed" type="error" />,
         description:
           error?.response?.data?.error ||
           "Failed to cancel the session. Please try again later",

@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ToasterTitle from "@/components/ui/toaster-title";
 import { toast } from "@/components/ui/use-toast";
 import { useUserStore } from "@/stores/userStore";
 import { Payments } from "@/types";
@@ -75,7 +76,7 @@ export default function PaymentHistory() {
       } catch (error) {
         console.error(error, "Error");
         toast({
-          title: "Error",
+          title: <ToasterTitle title="Error" type="error" />,
           description: "An error occurred while fetching payments",
         });
       }

@@ -12,7 +12,15 @@ import { UpdateUserData } from "@/types";
 import { usePaymentDetailsStore } from "@/stores/paymentDetailsStore";
 import { isCreditCard } from "validator";
 import InputMask from "react-input-mask";
-import { Camera, Loader, Pencil, Save, X } from "lucide-react";
+import {
+  Camera,
+  CheckCircle,
+  Loader,
+  Pencil,
+  Save,
+  X,
+  XCircle,
+} from "lucide-react";
 import Image from "next/image";
 import LayoutWrapper from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import PayPalConnect from "@/components/Paypal/PayPalConnect";
+import ToasterTitle from "@/components/ui/toaster-title";
 
 interface AdjustPersonalDetailsForm {
   name: string;
@@ -58,14 +67,18 @@ const Settings = () => {
     intent: "capture",
   };
 
-  const [topics, setTopics] = useState<string[]>([
-    "Laudantium Non Provident",
-    "Quis Porro Est",
-    "Voluptatibus Enim",
-    "Lorem Ipsum",
-    "Dolor Sit Amet",
-    "Conseteur Amis",
-  ]);
+  const topics = [
+    "Hebrew Bible (Tanakh/Torah)",
+    "Talmud (Gemara)",
+    "Jewish Mysticism (Kabbalah)",
+    "Jewish Law (Halakha)",
+    "Jewish Ethics & Philosophy",
+    "Jewish History",
+    "Hebrew",
+    "Mentorship",
+    "Business & Leadership",
+    "Relationships & Marriage",
+  ];
 
   const toggleTopic = (topic: string) => {
     setSelectedTopics((prev) => {
@@ -156,14 +169,14 @@ const Settings = () => {
       if (userData) {
         setUser({ token: user?.token!, ...userData });
         toast({
-          title: "Success",
+          title: <ToasterTitle title="Success" type="success" />,
           description: "User details updated successfully",
         });
         setIsEditing(false);
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: <ToasterTitle title="Error" type="error" />,
         description: "Error updating user details",
         variant: "destructive",
       });
@@ -218,7 +231,7 @@ const Settings = () => {
       console.error("Error uploading file:", error);
       setImageUploadLoading(false);
       toast({
-        title: "Error",
+        title: <ToasterTitle title="Error" type="error" />,
         description: "Error uploading image . Please try again",
         variant: "destructive",
       });
@@ -228,8 +241,6 @@ const Settings = () => {
     const { data: imageData } = supabase.storage
       .from("user-images")
       .getPublicUrl(filePath);
-
-    console.log(imageData, "imageData");
 
     await saveImageUrlToDatabase(imageData?.publicUrl as string);
   };
@@ -248,7 +259,7 @@ const Settings = () => {
 
     setImageUploadLoading(false);
     toast({
-      title: "Success",
+      title: <ToasterTitle title="Success" type="success" />,
       description: "Image uploaded successfully",
     });
 
@@ -266,7 +277,7 @@ const Settings = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: <ToasterTitle title="Error" type="error" />,
         description: "Error connecting stripe account",
         variant: "destructive",
       });
@@ -311,7 +322,7 @@ const Settings = () => {
         }
       } catch (error) {
         toast({
-          title: "Error",
+          title: <ToasterTitle title="Error" type="error" />,
           description: "Error fetching stripe dashboard link",
           variant: "destructive",
         });

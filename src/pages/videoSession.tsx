@@ -29,6 +29,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { title } from "process";
 import { Loader } from "lucide-react";
 import { GetServerSideProps } from "next";
+import ToasterTitle from "@/components/ui/toaster-title";
 
 const VideoSession = () => {
   const [showRating, setShowRating] = useState(false);
@@ -208,7 +209,7 @@ const VideoSession = () => {
       }
 
       toast({
-        title: "Session Ended",
+        title: <ToasterTitle title="Session Ended" type="success" />,
         description: "Session has been ended successfully",
       });
 
@@ -216,7 +217,7 @@ const VideoSession = () => {
     } catch (err) {
       console.error("Failed to end call:", err);
       toast({
-        title: "Error",
+        title: <ToasterTitle title="Error" type="error" />,
         description: "Failed to end session. Please try again later",
         variant: "destructive",
       });

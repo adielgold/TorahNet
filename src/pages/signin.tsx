@@ -17,9 +17,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import Image from "next/image";
-
+import ToasterTitle from "@/components/ui/toaster-title";
+import { useToast } from "@/components/ui/use-toast";
 interface FormValues {
   email: string;
   password: string;
@@ -38,6 +38,8 @@ const Signin: React.FC = () => {
 
   const { setPaymentDetails } = usePaymentDetailsStore();
 
+  const { toast } = useToast();
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setLoading(true);
     const { data: user, error: authError } =
@@ -47,7 +49,10 @@ const Signin: React.FC = () => {
       });
 
     if (authError) {
-      toast.error("Error Signin in user");
+      toast({
+        title: <ToasterTitle title="Error" type="error" />,
+        description: "Error Signin in user",
+      });
       setLoading(false);
       router.replace("/?error=signin");
     }
@@ -59,7 +64,10 @@ const Signin: React.FC = () => {
         .eq("id", user?.user?.id as string)
         .single();
       if (userError) {
-        toast.error("Error fetching user data");
+        toast({
+          title: <ToasterTitle title="Error" type="error" />,
+          description: "Error! Invalid Credentials",
+        });
         setLoading(false);
         router.replace("/?error=signin");
       }
@@ -74,7 +82,10 @@ const Signin: React.FC = () => {
             .eq("id", user?.user?.id as string)
             .single();
           if (pError) {
-            toast.error("Error fetching payment data");
+            toast({
+              title: <ToasterTitle title="Error" type="error" />,
+              description: "Error! Invalid Credentials",
+            });
             setLoading(false);
             router.replace("/?error=signin");
           }
