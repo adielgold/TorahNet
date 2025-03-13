@@ -26,6 +26,8 @@ import MessagingSidebar from "./MessagingSidebar";
 import MessagingChannelHeader from "./MessagingChannelHeader";
 import { Loader } from "lucide-react";
 import LayoutWrapper from "../Layout";
+import { FaUser } from "react-icons/fa";
+import MessagingChannelFooter from "./MessagingChannelFooter";
 
 interface ChatUIProps {
   token: string | null;
@@ -81,8 +83,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ token }) => {
 
   if (!client)
     return (
-      <div className="min-h-screen w-full items-center justify-center flex">
-        <Loader className="w-12 h-12 animate-spin text-primary-blue" />
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Loader className="h-12 w-12 animate-spin text-primary-blue" />
       </div>
     );
 
@@ -90,12 +92,14 @@ const ChatUI: React.FC<ChatUIProps> = ({ token }) => {
     <Chat client={client} theme="team light">
       <LayoutWrapper>
         <div style={{ display: "flex", width: "100%" }}>
-          <div className="w-full min-h-[90vh]">
+          <div className="min-h-[94vh] w-full">
             <Channel>
               <Window>
                 <MessagingChannelHeader />
 
                 <MessageList />
+                <MessagingChannelFooter />
+
                 <MessageInput />
               </Window>
               <Thread />

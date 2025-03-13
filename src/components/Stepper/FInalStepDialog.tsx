@@ -5,13 +5,14 @@ import { useRouter } from "next/router";
 import { ArrowIconWhite } from "@/Icons";
 import { createClient } from "@/utils/supabase/client";
 import { useProfileSetupStore } from "@/stores/profileSetupStore";
-import toast from "react-hot-toast";
 import { useUserStore } from "@/stores/userStore";
 import { usePaymentDetailsStore } from "@/stores/paymentDetailsStore";
 import axios from "axios";
 import { StepProps } from "@/lib/types";
 import { CheckCircle2 } from "lucide-react";
 import StepperButton from "./StepperButton";
+import ToasterTitle from "../ui/toaster-title";
+import { useToast } from "../ui/use-toast";
 
 const FinalStepDialog: React.FC<StepProps> = ({
   complete,
@@ -42,6 +43,8 @@ const FinalStepDialog: React.FC<StepProps> = ({
 
   const { setPaymentDetails } = usePaymentDetailsStore();
 
+  const { toast } = useToast();
+
   const registerUser = async () => {
     setLoading(true);
 
@@ -51,7 +54,10 @@ const FinalStepDialog: React.FC<StepProps> = ({
     });
 
     if (error) {
-      toast.error("Error registering user");
+      toast({
+        title: <ToasterTitle title="Error" type="error" />,
+        description: "Error registering user",
+      });
       router.replace("/getStarted?error=resgistration");
     }
 
@@ -70,14 +76,17 @@ const FinalStepDialog: React.FC<StepProps> = ({
         .single();
 
       if (usersError) {
-        toast.error("Error registering user");
+        toast({
+          title: <ToasterTitle title="Error" type="error" />,
+          description: "Error registering user",
+        });
         router.replace("/getStarted?error=resgistration");
       }
 
       if (usersData) {
         try {
           const { data: streamData } = await axios.post(
-            "/api/registerStreamUser"
+            "/api/registerStreamUser",
           );
 
           if (usersData?.role === "teacher") {
@@ -91,7 +100,10 @@ const FinalStepDialog: React.FC<StepProps> = ({
               .single();
 
             if (paymentError) {
-              toast.error("Error Setting up payment details");
+              toast({
+                title: <ToasterTitle title="Error" type="error" />,
+                description: "Error Setting up payment details",
+              });
               router.replace("/getStarted?error=settinguppayment");
             }
 
@@ -121,8 +133,8 @@ const FinalStepDialog: React.FC<StepProps> = ({
   return (
     <>
       <div className="text-center">
-        <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-500" />
-        <h2 className="text-2xl font-bold mb-2">
+        <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
+        <h2 className="mb-2 text-2xl font-bold">
           Welcome, {profileSetup?.name}!
         </h2>
         <p className="text-gray-600">

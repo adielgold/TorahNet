@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import axios from "axios";
+import ToasterTitle from "../ui/toaster-title";
 
 interface FormValues {
   message: string;
@@ -65,7 +66,7 @@ const SendMessage = ({
     if (!token) return;
     (async () => {
       const streamClient = StreamChat.getInstance(
-        process.env.NEXT_PUBLIC_STREAM_API_KEY!
+        process.env.NEXT_PUBLIC_STREAM_API_KEY!,
       );
       setClient(streamClient);
 
@@ -74,7 +75,7 @@ const SendMessage = ({
           id: user?.id as string,
           name: user?.name as string,
         },
-        token
+        token,
       );
     })();
   }, [token]);
@@ -108,7 +109,7 @@ const SendMessage = ({
       `channel_${user?.id?.slice(0, 15)}--${id?.slice(0, 15)}`,
       {
         members: [user?.id as string, id],
-      }
+      },
     );
 
     await newChannel.create();
@@ -131,7 +132,7 @@ const SendMessage = ({
     handleClose();
 
     toast({
-      title: "Message Sent",
+      title: <ToasterTitle title="Message Sent" type="success" />,
       description:
         "Message has been sent to Teacher successfully. Check your chat",
     });
@@ -144,17 +145,17 @@ const SendMessage = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
       onClick={handleClose}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-4">
+        <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-2 border-[#1e1e4a]">
               <AvatarImage src={image_url!} alt={name!} />
@@ -163,12 +164,12 @@ const SendMessage = ({
             <div>
               <h2 className="text-2xl font-semibold text-[#1e1e4a]">{name}</h2>
               <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                <Star className="mr-1 h-4 w-4 text-yellow-400" />
                 <span className="text-sm text-gray-600">
                   {ratingData?.review_count > 0 ? (
                     <>
                       {ratingData?.average_score?.toFixed(2)}
-                      <span className="underline ml-1">
+                      <span className="ml-1 underline">
                         ({ratingData?.review_count} reviews)
                       </span>
                     </>
@@ -187,13 +188,13 @@ const SendMessage = ({
           </button>
         </div>
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-[#1e1e4a] mb-2">
+          <h3 className="mb-2 text-lg font-semibold text-[#1e1e4a]">
             Biography
           </h3>
           <p className="text-gray-600">{bio}</p>
         </div>
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-[#1e1e4a] mb-2">
+          <h3 className="mb-2 text-lg font-semibold text-[#1e1e4a]">
             Expertise
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -209,7 +210,7 @@ const SendMessage = ({
           </div>
         </div>
         <div
-          className={`flex justify-between  ${
+          className={`flex justify-between ${
             channel ? "flex-row items-center" : "flex-col gap-4"
           }`}
         >
@@ -220,7 +221,7 @@ const SendMessage = ({
           {channel ? (
             <Button
               onClick={() => router.push(`/chat?channel=${channel.cid}`)}
-              className="bg-[#1e1e4a] hover:bg-[#2a2a5a] text-white transition-colors duration-300"
+              className="bg-[#1e1e4a] text-white transition-colors duration-300 hover:bg-[#2a2a5a]"
             >
               Go to Chat
             </Button>
@@ -237,18 +238,18 @@ const SendMessage = ({
                     message: "Message should be atleast 10 characters",
                   },
                 })}
-                className="w-full h-32 border border-[#D7E3F4] rounded-lg p-2"
+                className="h-32 w-full rounded-lg border border-[#D7E3F4] p-2"
                 placeholder="Type your message here..."
               ></textarea>
               {errors.message && (
-                <p className="text-red-500 text-xs mt-2 font-bold">
+                <p className="mt-2 text-xs font-bold text-red-500">
                   {errors.message.message}
                 </p>
               )}
-              <div className="flex w-full justify-end mt-5">
+              <div className="mt-5 flex w-full justify-end">
                 <Button
                   type="submit"
-                  className="bg-[#1e1e4a] hover:bg-[#2a2a5a] text-white transition-colors duration-300"
+                  className="bg-[#1e1e4a] text-white transition-colors duration-300 hover:bg-[#2a2a5a]"
                 >
                   Send Message
                 </Button>

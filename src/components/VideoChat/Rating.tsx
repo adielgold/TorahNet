@@ -28,6 +28,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "../ui/textarea";
+import ToasterTitle from "../ui/toaster-title";
 
 const feedbackItems = [
   "Laudantium Non Provident",
@@ -48,7 +49,7 @@ const Rating = () => {
   const [personalFeedback, setPersonalFeedback] = useState<string>("");
 
   const [feedbackImprovements, setFeedbackImprovements] = useState<string[]>(
-    []
+    [],
   );
 
   const [teacher, setTeacher] = useState<User | null>(null);
@@ -77,7 +78,7 @@ const Rating = () => {
       if (error) {
         console.log(error, "Error getting user");
         toast({
-          title: "Error",
+          title: <ToasterTitle title="Error" type="error" />,
           description: "Error getting teacher Info",
           variant: "destructive",
         });
@@ -101,7 +102,7 @@ const Rating = () => {
     if (error) {
       console.log(error, "Error inserting feedback");
       toast({
-        title: "Error",
+        title: <ToasterTitle title="Error" type="error" />,
         description: "Error submitting feedback",
         variant: "destructive",
       });
@@ -110,7 +111,7 @@ const Rating = () => {
     }
 
     toast({
-      title: "Feedback Submitted",
+      title: <ToasterTitle title="Feedback Submitted" type="success" />,
       description: "Feedback has been submitted successfully",
     });
 
@@ -134,17 +135,17 @@ const Rating = () => {
     setSelectedFeedback((prev) =>
       prev.includes(option)
         ? prev.filter((item) => item !== option)
-        : [...prev, option]
+        : [...prev, option],
     );
   };
 
   return (
     <LayoutWrapper>
-      <div className="min-h-[90vh] flex items-center justify-center">
-        <Card className="w-full max-w-2xl bg-white/90 backdrop-blur-md shadow-xl">
+      <div className="flex min-h-[90vh] items-center justify-center">
+        <Card className="w-full max-w-2xl bg-white/90 shadow-xl backdrop-blur-md">
           <CardHeader className="relative">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-            <CardTitle className="text-3xl font-bold text-center text-[#1e1e4a] mt-4">
+            <div className="absolute left-0 top-0 h-2 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+            <CardTitle className="mt-4 text-center text-3xl font-bold text-[#1e1e4a]">
               How was your experience?
             </CardTitle>
           </CardHeader>
@@ -155,7 +156,7 @@ const Rating = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Avatar className="w-32 h-32 mb-4 ring-4 ring-[#1e1e4a] ring-offset-2">
+              <Avatar className="mb-4 h-32 w-32 ring-4 ring-[#1e1e4a] ring-offset-2">
                 <AvatarImage src={teacher?.image_url!} alt="Muhammad Rayyaan" />
                 <AvatarFallback>{teacher?.name}</AvatarFallback>
               </Avatar>
@@ -170,14 +171,14 @@ const Rating = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <p className="text-center text-gray-600 font-medium">
+              <p className="text-center font-medium text-gray-600">
                 How many stars do you give?
               </p>
               <div className="flex justify-center">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <motion.button
                     key={star}
-                    className="focus:outline-none transform transition-transform duration-200"
+                    className="transform transition-transform duration-200 focus:outline-none"
                     onMouseEnter={() => setHoveredRating(star)}
                     onMouseLeave={() => setHoveredRating(0)}
                     onClick={() => handleRatingChange(star)}
@@ -185,9 +186,9 @@ const Rating = () => {
                     whileTap={{ scale: 0.9 }}
                   >
                     <Star
-                      className={`w-12 h-12 ${
+                      className={`h-12 w-12 ${
                         star <= (hoveredRating || clickedStars)
-                          ? "text-yellow-400 fill-yellow-400 drop-shadow-lg"
+                          ? "fill-yellow-400 text-yellow-400 drop-shadow-lg"
                           : "text-gray-300"
                       }`}
                     />
@@ -202,7 +203,7 @@ const Rating = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <p className="text-center text-gray-600 font-medium">
+              <p className="text-center font-medium text-gray-600">
                 Any quick feedback to help Dolor Sit Amet?
               </p>
               <div className="flex flex-wrap justify-center gap-3">
@@ -221,15 +222,15 @@ const Rating = () => {
                           ? "default"
                           : "outline"
                       }
-                      className={`cursor-pointer text-sm px-3 py-1 ${
+                      className={`cursor-pointer px-3 py-1 text-sm ${
                         feedbackImprovements.includes(option)
-                          ? "bg-[#4a4ae3] hover:bg-[#3a3ad3] text-white"
+                          ? "bg-[#4a4ae3] text-white hover:bg-[#3a3ad3]"
                           : "bg-white text-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white"
                       }`}
                       onClick={() => {
                         if (feedbackImprovements.includes(option)) {
                           setFeedbackImprovements((prev) =>
-                            prev.filter((i) => i !== option)
+                            prev.filter((i) => i !== option),
                           );
                         } else {
                           setFeedbackImprovements((prev) => [...prev, option]);
@@ -250,7 +251,7 @@ const Rating = () => {
             >
               <Button
                 variant="outline"
-                className="w-full text-[#1e1e4a] border-[#1e1e4a] hover:bg-[#1e1e4a] hover:text-white transition-colors duration-300"
+                className="w-full border-[#1e1e4a] text-[#1e1e4a] transition-colors duration-300 hover:bg-[#1e1e4a] hover:text-white"
                 onClick={() =>
                   setIsPersonalFeedbackOpen(!isPersonalFeedbackOpen)
                 }
@@ -288,11 +289,11 @@ const Rating = () => {
             <Button
               onClick={submitFeedback}
               disabled={loading}
-              className="w-full bg-primary-blue hover:bg-primary-blue text-white font-semibold py-3 rounded-full transition-all duration-300 transform hover:scale-105"
+              className="w-full transform rounded-full bg-primary-blue py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-primary-blue"
             >
               Submit Review
               {loading ? (
-                <Loader className="h-5 w-5 text-white animate-spin" />
+                <Loader className="h-5 w-5 animate-spin text-white" />
               ) : (
                 <Send className="ml-2 h-5 w-5" />
               )}

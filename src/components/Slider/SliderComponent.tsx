@@ -1,12 +1,11 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function valuetext(value: number) {
   return `${value}°C`;
 }
-
 
 interface SliderComponentProps {
   filterPrice: string;
@@ -19,26 +18,43 @@ export default function SliderComponent({
   filterPrice,
   setFilterPrice,
   max,
-  type
+  type,
 }: SliderComponentProps) {
+  const minDistance = type === "price" ? 10 : 1;
+  const isInitialMount = useRef(true);
 
-const minDistance = type === "price" ? 10 : 1;
+  // Parse filter values with better error handling
+  const parseFilterValues = () => {
+    const filterPriceArray = filterPrice?.split("-");
 
-
-  const filterPriceArray = filterPrice?.split("-");
-
-  const [value1, setValue1] = React.useState<number[]>(
-    filterPriceArray?.length === 2 &&
+    // Check if we have two valid numbers
+    if (
+      filterPriceArray?.length === 2 &&
       !isNaN(+filterPriceArray[0]) &&
       !isNaN(+filterPriceArray[1])
-      ? [+filterPriceArray[0], +filterPriceArray[1]]
-      : type === "price" ? [0, 25] : [0, 5]
-  );
+    ) {
+      return [+filterPriceArray[0], +filterPriceArray[1]];
+    }
+
+    // Return default values based on type
+    return type === "price" ? [0, 25] : [0, 5];
+  };
+
+  const [value1, setValue1] = React.useState<number[]>(parseFilterValues());
+
+  // Update slider when filterPrice prop changes
+  useEffect(() => {
+    const newValues = parseFilterValues();
+    // Only update if values are different to avoid infinite loops
+    if (value1[0] !== newValues[0] || value1[1] !== newValues[1]) {
+      setValue1(newValues);
+    }
+  }, [filterPrice]);
 
   const handleChange1 = (
     event: Event,
     newValue: number | number[],
-    activeThumb: number
+    activeThumb: number,
   ) => {
     if (!Array.isArray(newValue)) {
       return;
@@ -51,15 +67,25 @@ const minDistance = type === "price" ? 10 : 1;
     }
   };
 
+  // Update parent component with slider value changes
   useEffect(() => {
+    // Skip the first render to avoid unnecessary API calls
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     const handler = setTimeout(() => {
-      setFilterPrice(`${value1[0]}-${value1[1]}`);
-    }, 1000); // Debounce time of 1000ms
+      const newFilterValue = `${value1[0]}-${value1[1]}`;
+      if (newFilterValue !== filterPrice) {
+        setFilterPrice(newFilterValue);
+      }
+    }, 500); // Debounce time of 500ms
 
     return () => {
       clearTimeout(handler);
     };
-  }, [value1, setFilterPrice]);
+  }, [value1, setFilterPrice, filterPrice]);
 
   return (
     <Box sx={{ width: 300 }}>

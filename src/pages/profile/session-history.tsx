@@ -145,6 +145,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import ToasterTitle from "@/components/ui/toaster-title";
 import { useToast } from "@/components/ui/use-toast";
 import withAuth from "@/components/withAuth/withAuth";
 import { useUserStore } from "@/stores/userStore";
@@ -199,7 +200,7 @@ const SessionHistory: React.FC = () => {
       if (selectedFilter !== "All") {
         query = query.eq(
           "status",
-          selectedFilter.toLowerCase().replace(" ", "_")
+          selectedFilter.toLowerCase().replace(" ", "_"),
         );
       }
 
@@ -217,7 +218,7 @@ const SessionHistory: React.FC = () => {
     } catch (error) {
       console.error("Error fetching sessions:", error);
       toast({
-        title: "Error fetching sessions",
+        title: <ToasterTitle title="Error fetching sessions" type="error" />,
         description: "Please try again later",
         variant: "destructive",
       });
@@ -236,10 +237,10 @@ const SessionHistory: React.FC = () => {
   return (
     <NavbarWrapper>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        <h1 className="mb-6 text-2xl font-bold text-gray-800">
           Session History
         </h1>
-        <div className="max-w-[250px] w-full mb-4">
+        <div className="mb-4 w-full max-w-[250px]">
           <Select
             onValueChange={(val) => setSelectedFilter(val)}
             value={selectedFilter}
@@ -259,7 +260,7 @@ const SessionHistory: React.FC = () => {
           </Select>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="mb-6 rounded-lg bg-white p-4 shadow">
         <p className="text-lg font-semibold text-gray-700">
           Total Sessions {selectedFilter !== "All" && selectedFilter} :{" "}
           {sessions?.length}
@@ -267,8 +268,8 @@ const SessionHistory: React.FC = () => {
       </div>
 
       {sessionsLoading && (
-        <div className="w-full flex items-center justify-center mt-4">
-          <Loader className="w-8 h-8 animate-spin text-primary-blue" />
+        <div className="mt-4 flex w-full items-center justify-center">
+          <Loader className="h-8 w-8 animate-spin text-primary-blue" />
         </div>
       )}
 
@@ -281,9 +282,9 @@ const SessionHistory: React.FC = () => {
       )}
 
       {!sessionsLoading && sessions.length === 0 && (
-        <div className="flex items-center w-full">
-          <FaRegCircleQuestion className="w-8 h-8 text-gray-400" />
-          <p className=" text-gray-400 ml-3">
+        <div className="flex w-full items-center">
+          <FaRegCircleQuestion className="h-8 w-8 text-gray-400" />
+          <p className="ml-3 text-gray-400">
             No sessions found for the selected filter
           </p>
         </div>

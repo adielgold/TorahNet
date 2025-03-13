@@ -12,17 +12,21 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
   setSelectedTopics,
 }) => {
   const topics = [
-    "Laudantium Non Provident",
-    "Quis Porro Est",
-    "Voluptatibus Enim",
-    "Lorem Ipsum",
-    "Dolor Sit Amet",
-    "Conseteur Amis",
+    "Hebrew Bible (Tanakh/Torah)",
+    "Talmud (Gemara)",
+    "Jewish Mysticism (Kabbalah)",
+    "Jewish Law (Halakha)",
+    "Jewish Ethics & Philosophy",
+    "Jewish History",
+    "Hebrew",
+    "Mentorship",
+    "Business & Leadership",
+    "Relationships & Marriage",
   ];
 
   return (
-    <div className="flex flex-col sm:w-[540px] min-h-[100px] justify-center items-center">
-      <div className="flex flex-wrap justify-center items-center">
+    <div className="flex min-h-[100px] flex-col items-center justify-center sm:w-[540px]">
+      <div className="flex flex-wrap items-center justify-center">
         {topics.map((topic, index) => (
           <QuickLinksCard
             key={index}

@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import LayoutWrapper from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ToasterTitle from "@/components/ui/toaster-title";
 
 const likedArticles = [
   {
@@ -105,7 +106,7 @@ const Profile = () => {
     } catch (error) {
       console.error("Error fetching sessions:", error);
       toast({
-        title: "Error fetching sessions",
+        title: <ToasterTitle title="Error fetching sessions" type="error" />,
         description: "Please try again later",
       });
       setSessionsLoading(false);

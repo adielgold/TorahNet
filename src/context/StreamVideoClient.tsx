@@ -1,3 +1,4 @@
+import ToasterTitle from "@/components/ui/toaster-title";
 import { useToast } from "@/components/ui/use-toast";
 import { useUserStore } from "@/stores/userStore";
 import { createClient } from "@/utils/supabase/client";
@@ -39,7 +40,7 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         if (error) {
           console.log(error, "Error getting session");
           toast({
-            title: "Error getting session",
+            title: <ToasterTitle title="Error getting session" type="error" />,
             description: "Error getting session",
             variant: "destructive",
           });
@@ -61,7 +62,12 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         console.log(error, "Error from stream");
 
         toast({
-          title: "Failed Initialization of Stream",
+          title: (
+            <ToasterTitle
+              title="Failed Initialization of Stream"
+              type="error"
+            />
+          ),
           description: "Failed to get stream token",
         });
       }
@@ -88,7 +94,7 @@ export const useStreamClient = () => {
 
   if (!streamContext) {
     throw new Error(
-      "useCurrentUser has to be used within <StreamContext.Provider>"
+      "useCurrentUser has to be used within <StreamContext.Provider>",
     );
   }
 

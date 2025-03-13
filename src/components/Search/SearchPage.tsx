@@ -28,46 +28,71 @@ const SearchPage = ({
   handleInputChange,
   filterRating,
   setFilterRating,
+  selectedTopics,
 }: SearchPageProps) => {
-  const { loading } = useSearchUserStore();
+  const { loading, users } = useSearchUserStore();
 
   const [inputValue, setInputValue] = React.useState(searchTerm);
 
+  // Update local input value when searchTerm prop changes
   useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
+  // Debounce search input changes
+  useEffect(() => {
+    // Skip the initial render when inputValue is set from props
+    if (inputValue === searchTerm) return;
+
     const handler = setTimeout(() => {
       handleInputChange(inputValue);
-    }, 1000); // Debounce time of 1000ms
+    }, 500); // Debounce time of 500ms
 
     return () => {
       clearTimeout(handler);
     };
-  }, [inputValue, handleInputChange]);
+  }, [inputValue, handleInputChange, searchTerm]);
+
+  // Determine what to display in the search results heading
+  const getSearchHeading = () => {
+    if (searchTerm) {
+      return `Search results for: "${searchTerm}"`;
+    } else if (
+      filterPrice ||
+      filterRating ||
+      (selectedTopics && selectedTopics.length > 0)
+    ) {
+      return "Filtered results";
+    } else {
+      return "All results";
+    }
+  };
 
   return (
-    <main className="flex-1 max-w-6xl mx-auto px-4 py-8">
+    <main className="mx-auto max-w-6xl flex-1 px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold text-[#1e1e4a] mb-4">
-          Search results for: &quot;{searchTerm}&quot;
+        <h1 className="mb-4 text-4xl font-bold text-[#1e1e4a]">
+          {getSearchHeading()}
         </h1>
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="relative flex-grow max-w-xl">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative max-w-xl flex-grow">
             <Input
               type="text"
               placeholder="Refine your search..."
-              className="pl-10 pr-4 py-2 rounded-full border-2 border-[#1e1e4a] focus:ring-2 focus:ring-[#4a4ae3] focus:border-transparent"
+              className="rounded-full border-2 border-[#1e1e4a] py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-[#4a4ae3]"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
           </div>
 
-          <div className="w-full flex flex-col  ">
-            <p className="mb-10 text-darkblueui text-md">Price Range</p>
+          <div className="flex w-full flex-col">
+            <p className="text-md mb-10 text-darkblueui">Price Range</p>
             <SliderComponent
               filterPrice={filterPrice}
               setFilterPrice={setFilterPrice}
@@ -75,8 +100,8 @@ const SearchPage = ({
               type="price"
             />
           </div>
-          <div className="w-full flex flex-col  ">
-            <p className="mb-10 text-darkblueui text-md">Ratings</p>
+          <div className="flex w-full flex-col">
+            <p className="text-md mb-10 text-darkblueui">Ratings</p>
             <SliderComponent
               filterPrice={filterRating}
               setFilterPrice={setFilterRating}
@@ -153,7 +178,7 @@ const SearchPage = ({
 
       {loading ? (
         <div className="flex items-center justify-center">
-          <Loader className="animate-spin w-10 h-10 text-primary-blue" />
+          <Loader className="h-10 w-10 animate-spin text-primary-blue" />
         </div>
       ) : (
         <SearchResults />
