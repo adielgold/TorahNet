@@ -67,6 +67,41 @@ const MessagingChannelFooter: React.FC = () => {
 
   const { client: streamClient } = useStreamClient();
 
+  const fetchExistingSession = async () => {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    let query = supabase.from("sessions").select("*");
+
+    if (user?.role === "teacher") {
+      query = query.eq("teacher_id", user?.id);
+      query = query.eq("student_id", members?.[0]?.user?.id!);
+    } else {
+      query = query.eq("student_id", user?.id!);
+      query = query.eq("teacher_id", members?.[0]?.user?.id!);
+    }
+
+    query = query
+      .gte("scheduledAt", oneHourAgo.toISOString())
+      .eq("status", "scheduled");
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.log(error, "Error");
+      toast({
+        title: <ToasterTitle title="Error" type="error" />,
+        description: "Failed to fetch existing session",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data?.length > 0) {
+      setExistingSession((data?.[0] as SessionWithUsers) ?? null);
+    }
+  };
+
   const onBookSession = async (data: { dateTime: Date }) => {
     const startsAt = data.dateTime.toLocaleTimeString([], {
       hour: "2-digit",
@@ -91,7 +126,7 @@ const MessagingChannelFooter: React.FC = () => {
         durationInMins: 60,
         scheduledAt: data.dateTime.toISOString(),
         startsAt: startsAt,
-        status: "payment_pending",
+        status: "scheduled",
       })
       .select(`*`)
       .single();
@@ -123,6 +158,8 @@ const MessagingChannelFooter: React.FC = () => {
           starts_at: new Date(sessionData.scheduledAt!).toISOString(),
         },
       });
+
+      await fetchExistingSession();
 
       setIsDialogOpen(false);
 
@@ -178,41 +215,6 @@ const MessagingChannelFooter: React.FC = () => {
       // } catch (error) {
       //   console.error("Error creating PayPal order:", error);
       // }
-    }
-  };
-
-  const fetchExistingSession = async () => {
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-
-    let query = supabase.from("sessions").select("*");
-
-    if (user?.role === "teacher") {
-      query = query.eq("teacher_id", user?.id);
-      query = query.eq("student_id", members?.[0]?.user?.id!);
-    } else {
-      query = query.eq("student_id", user?.id!);
-      query = query.eq("teacher_id", members?.[0]?.user?.id!);
-    }
-
-    query = query
-      .gte("scheduledAt", oneHourAgo.toISOString())
-      .eq("status", "scheduled");
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.log(error, "Error");
-      toast({
-        title: <ToasterTitle title="Error" type="error" />,
-        description: "Failed to fetch existing session",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (data?.length > 0) {
-      setExistingSession((data?.[0] as SessionWithUsers) ?? null);
     }
   };
 
@@ -386,9 +388,9 @@ const MessagingChannelFooter: React.FC = () => {
           <Card className="z-50">
             <CardContent className="sm:max-w-[425px]">
               <CardHeader className="px-0">
-                <CardTitle>Reschedule Session</CardTitle>
+                <CardTitle>Schedule Session</CardTitle>
                 <CardDescription>
-                  Pick a new date and time to reschedule your session.
+                  Pick a new date and time to schedule your session.
                 </CardDescription>
               </CardHeader>
               <div className="grid gap-4 py-4">
