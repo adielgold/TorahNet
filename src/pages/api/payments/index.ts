@@ -53,6 +53,16 @@ export default async function handler(
       }
 
       const currentDate = new Date();
+      // implementing payout tracking
+      // const totalAmountAvailableForWithdrawal = paymentData
+      //   .filter(
+      //     (payment) =>
+      //       new Date(payment.payout_due_date) <= currentDate &&
+      //       payment.status === "completed",
+      //   )
+      //   .reduce((sum, payment) => sum + payment.teacher_amount, 0)
+
+      // new logic;
       const totalAmountAvailableForWithdrawal = paymentData
         .filter(
           (payment) =>

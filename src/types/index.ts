@@ -23,8 +23,13 @@ type SessionWithUsers = Session & {
 interface UpdateUserData {
   name: string;
   bio: string;
-  topics: string[]; // Assuming selectedTopics is already defined somewhere
-  expertise?: string; // Marking expertise as optional
+  topics: string[];
+  expertise?: string;
+  available_hours?: {
+    start: string;
+    end: string;
+    timezone: string;
+  } | null;
 }
 
 // Google Analytics types
@@ -32,7 +37,7 @@ interface Window {
   gtag: (
     type: string,
     trackingId: string,
-    config?: { [key: string]: any },
+    config?: { [key: string]: any }
   ) => void;
   dataLayer: any[];
 }
@@ -43,7 +48,7 @@ declare global {
     gtag: (
       type: string,
       trackingId: string,
-      config?: { [key: string]: any },
+      config?: { [key: string]: any }
     ) => void;
     dataLayer: any[];
   }

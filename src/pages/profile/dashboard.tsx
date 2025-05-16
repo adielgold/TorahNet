@@ -69,6 +69,12 @@ const Profile = () => {
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Add this at the beginning of your Dashboard component
+  useEffect(() => {
+    // Clear registration in progress flag
+    localStorage.removeItem("torahnet_registration_in_progress");
+  }, []);
+
   const fetchSessions = async () => {
     try {
       setSessionsLoading(true);

@@ -33,6 +33,7 @@ import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import PayPalConnect from "@/components/Paypal/PayPalConnect";
 import ToasterTitle from "@/components/ui/toaster-title";
+import { TeacherAvailability } from "@/components/TimePicker/TeacherAvailability";
 
 interface AdjustPersonalDetailsForm {
   name: string;
@@ -40,6 +41,12 @@ interface AdjustPersonalDetailsForm {
   expertise?: string;
   hourly_rate?: number;
   card_number?: string;
+  paypal_email?: string;
+  available_hours: {
+    start: string;
+    end: string;
+    timezone: string;
+  };
 }
 
 interface AdjustPaymentDetailsForm {}
@@ -106,6 +113,15 @@ const Settings = () => {
       setValue("expertise", user?.expertise ?? "");
       setValue("hourly_rate", paymentDetails?.hourly_rate ?? 0);
       setValue("card_number", paymentDetails?.card_number ?? "");
+      setValue("paypal_email", paymentDetails?.stripe_account_id ?? "");
+      setValue(
+        "available_hours",
+        user?.available_hours ?? {
+          start: "09:00",
+          end: "17:00",
+          timezone: "UTC",
+        }
+      );
     }
     setSelectedTopics(user?.topics ?? []);
   }, [user, paymentDetails]);
@@ -131,6 +147,7 @@ const Settings = () => {
 
       if (user?.role === "teacher") {
         updateData.expertise = data.expertise;
+        updateData.available_hours = data.available_hours;
       }
 
       const { data: userData, error: userError } = await supabase
@@ -159,6 +176,26 @@ const Settings = () => {
 
         if (pdData) {
           setPaymentDetails(pdData);
+        }
+
+        const { data: payaplEmail, error: payaplEmailError } = await supabase
+          .from("payment_details")
+          .update({
+            stripe_account_id: data.paypal_email,
+            onboarding_completed: true,
+          })
+          .eq("id", user?.id as string)
+          .select("*")
+          .single();
+
+        if (payaplEmailError) {
+          console.log(payaplEmailError);
+          throw payaplEmailError;
+        }
+
+        if (payaplEmail) {
+          console.log(payaplEmail);
+          setPaymentDetails(payaplEmail);
         }
       }
 
@@ -304,32 +341,32 @@ const Settings = () => {
     })();
   }, [user]);
 
-  useEffect(() => {
-    if (
-      !user ||
-      (!paymentDetails?.stripe_account_id &&
-        !paymentDetails?.onboarding_completed)
-    )
-      return;
-    const getDashboardLink = async () => {
-      try {
-        const { data } = await axios.post("/api/stripe/dashboard-link", {
-          stripeAccountId: paymentDetails?.stripe_account_id,
-        });
+  // useEffect(() => {
+  //   if (
+  //     !user ||
+  //     (!paymentDetails?.stripe_account_id &&
+  //       !paymentDetails?.onboarding_completed)
+  //   )
+  //     return;
+  //   const getDashboardLink = async () => {
+  //     try {
+  //       const { data } = await axios.post("/api/stripe/dashboard-link", {
+  //         stripeAccountId: paymentDetails?.stripe_account_id,
+  //       });
 
-        if (data?.url) {
-          setLoginLink(data.url);
-        }
-      } catch (error) {
-        toast({
-          title: <ToasterTitle title="Error" type="error" />,
-          description: "Error fetching stripe dashboard link",
-          variant: "destructive",
-        });
-      }
-    };
-    getDashboardLink();
-  }, [paymentDetails, user]);
+  //       if (data?.url) {
+  //         setLoginLink(data.url);
+  //       }
+  //     } catch (error) {
+  //       toast({
+  //         title: <ToasterTitle title="Error" type="error" />,
+  //         description: "Error fetching stripe dashboard link",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
+  //   getDashboardLink();
+  // }, [paymentDetails, user]);
 
   return (
     <LayoutWrapper>
@@ -456,11 +493,10 @@ const Settings = () => {
                 </Badge>
               ))}
             </div>
-            {/* {user?.role === "teacher" && (
+            {user?.role === "teacher" && (
               <>
                 <CardTitle className="pt-4">Payment Details</CardTitle>
                 <div>
-// Originally commented out {<Label htmlFor="hourlyFee">Hourly Fee ($)</Label>}
                   <ValidateInput
                     control={control}
                     name="hourly_rate"
@@ -472,13 +508,24 @@ const Settings = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cardNumber" className="block">
-                    Connect yout PayPal Account
-                  </Label>
-
+                  <TeacherAvailability
+                    control={control}
+                    setValue={setValue}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
                   {!paymentDetails?.stripe_account_id &&
                   !paymentDetails?.onboarding_completed ? (
-                    <PayPalConnect />
+                    <ValidateInput
+                      control={control}
+                      name="paypal_email"
+                      placeholder="abc@xyz.com"
+                      rules={{}}
+                      label="Paypal Email"
+                      type="email"
+                      disabled={!isEditing}
+                    />
                   ) : null}
                   {paymentDetails?.disabled_reason && (
                     <p className="mt-1.5 text-sm font-medium text-red-500">
@@ -499,13 +546,15 @@ const Settings = () => {
                   {paymentDetails?.stripe_account_id &&
                     paymentDetails?.onboarding_completed &&
                     !paymentDetails?.disabled_reason && (
-                      <Button
-                        onClick={() => window?.open(loginLink!, "_blank")}
-                        className="mt-4 bg-darkblueui"
-                        disabled={!loginLink}
-                      >
-                        Go to PayPal Dashboard
-                      </Button>
+                      <ValidateInput
+                        control={control}
+                        name="paypal_email"
+                        placeholder="abc@xyz.com"
+                        rules={{}}
+                        label="Paypal Email"
+                        type="email"
+                        disabled={!isEditing}
+                      />
                     )}
                 </div>
                 <p className="text-sm text-gray-500">
@@ -515,7 +564,7 @@ const Settings = () => {
                   hour.
                 </p>
               </>
-            )} */}
+            )}
           </CardContent>
         </Card>
         {/* </form> */}

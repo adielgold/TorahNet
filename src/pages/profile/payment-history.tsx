@@ -39,7 +39,7 @@ import ToasterTitle from "@/components/ui/toaster-title";
 import { toast } from "@/components/ui/use-toast";
 import { useUserStore } from "@/stores/userStore";
 import { Payments } from "@/types";
-import { createClient } from "@/utils/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import {
   ArrowDownIcon,
@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-
+import { createClient } from "@/utils/supabase/client";
 interface WithDrawalFormProps {
   amount: number;
 }
@@ -86,24 +86,21 @@ export default function PaymentHistory() {
 
   const onSubmit: SubmitHandler<WithDrawalFormProps> = async (data) => {
     // Handle the form submission
-    // try {
-    //   const { data: transferData } = await axios.post(
-    //     "/api/paypal/payments/transfer",
-    //     {
-    //       amount: +data.amount,
-    //     },
-    //   );
-    //   setDialogOpen(false);
-    //   toast({
-    //     title: "Success",
-    //     description: transferData?.message,
-    //   });
-    // } catch (error: any) {
-    //   toast({
-    //     title: "Error",
-    //     description: error?.response?.data?.error ?? "An error occurred",
-    //   });
-    // }
+    try {
+      const { data: transferData } = await axios.post("/api/manualPayments", {
+        amount: +data.amount,
+      });
+      setDialogOpen(false);
+      toast({
+        title: "Success",
+        description: transferData?.message,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.response?.data?.error ?? "An error occurred",
+      });
+    }
   };
 
   return (
@@ -324,7 +321,7 @@ export default function PaymentHistory() {
                         <TableRow key={withdrawal?.id}>
                           <TableCell>
                             {new Date(
-                              withdrawal?.created_at,
+                              withdrawal?.created_at
                             ).toLocaleDateString()}
                           </TableCell>
 
@@ -343,7 +340,7 @@ export default function PaymentHistory() {
                             </span>
                           </TableCell>
                         </TableRow>
-                      ),
+                      )
                     )}
                   </TableBody>
                 </Table>

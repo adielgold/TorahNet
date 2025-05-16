@@ -1,18 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FirstStep from "./FirstStep";
 import SecondStep from "./SecondStep";
 import ThirdStep from "./ThirdStep";
 import FinalStepDialog from "./FInalStepDialog";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { CheckCircle2, ChevronRight, User } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { CheckCircle2, ChevronRight, Loader2, User } from "lucide-react";
 import { Button } from "../ui/button";
+import { useRouter } from "next/router";
 
 const steps = [
   { title: "Account Details", icon: User },
@@ -21,9 +16,42 @@ const steps = [
   { title: "Ready!", icon: CheckCircle2 },
 ];
 
+const REGISTRATION_KEY = "torahnet_registration_in_progress";
+
 const Stepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [complete, setComplete] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const router = useRouter();
+
+  // Check localStorage on component mount
+  useEffect(() => {
+    const registrationInProgress = localStorage.getItem(REGISTRATION_KEY);
+    if (registrationInProgress === "true") {
+      setIsRegistering(true);
+    }
+  }, []);
+
+  // Redirect to dashboard if registration is in progress
+  useEffect(() => {
+    if (isRegistering) {
+      const checkAuthAndRedirect = async () => {
+        // Wait a bit to ensure auth state is updated
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Redirect to dashboard
+        router.replace("/profile/dashboard");
+      };
+
+      checkAuthAndRedirect();
+    }
+  }, [isRegistering, router]);
+
+  const handleRegistrationStart = () => {
+    // Set in state and localStorage
+    setIsRegistering(true);
+    localStorage.setItem(REGISTRATION_KEY, "true");
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -65,6 +93,7 @@ const Stepper = () => {
             setComplete={setComplete}
             setCurrentStep={setCurrentStep}
             steps={steps}
+            onRegistrationStart={handleRegistrationStart}
           />
         );
     }
@@ -72,7 +101,19 @@ const Stepper = () => {
 
   return (
     <>
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-2xl relative">
+        {isRegistering && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-lg">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800">
+              Setting up your account
+            </h3>
+            <p className="text-gray-600 mt-2">
+              Please wait while we prepare your dashboard...
+            </p>
+          </div>
+        )}
+
         <CardHeader>
           <CardTitle className="text-2xl text-center text-[#1e1e4a]">
             Setting up your Profile

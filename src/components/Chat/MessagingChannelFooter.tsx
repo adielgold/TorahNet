@@ -37,6 +37,7 @@ import axios from "axios";
 import { loadScript } from "@paypal/paypal-js";
 import { capturePaypalPayment } from "@/lib/capturePaypalPayment";
 import ToasterTitle from "../ui/toaster-title";
+import moment from "moment-timezone";
 
 const MessagingChannelFooter: React.FC = () => {
   const { client } = useChatContext();
@@ -54,11 +55,11 @@ const MessagingChannelFooter: React.FC = () => {
   const unfiltredMembers = Object.values(channel.state.members || {});
 
   const members = Object.values(channel.state.members).filter(
-    (member) => member.user?.id !== client?.user?.id,
+    (member) => member.user?.id !== client?.user?.id
   );
 
   const onlineMembers = unfiltredMembers.filter(
-    (member) => member.user?.online,
+    (member) => member.user?.online
   );
 
   const supabase = createClient();
@@ -103,6 +104,91 @@ const MessagingChannelFooter: React.FC = () => {
   };
 
   const onBookSession = async (data: { dateTime: Date }) => {
+    const teacherId =
+      user?.role === "teacher" ? user?.id : members?.[0]?.user?.id;
+
+    if (!teacherId) {
+      toast({
+        title: <ToasterTitle title="Booking Failed" type="error" />,
+        description: "Could not identify the teacher",
+      });
+      return;
+    }
+
+    // Fetch teacher's availability
+    const { data: teacherData, error: teacherError } = await supabase
+      .from("users")
+      .select("available_hours")
+      .eq("id", teacherId)
+      .single();
+
+    if (teacherError || !teacherData?.available_hours) {
+      toast({
+        title: <ToasterTitle title="Booking Failed" type="error" />,
+        description: "Could not verify teacher's availability",
+      });
+      return;
+    }
+
+    // Convert booking time to teacher's timezone for comparison
+    const teacherAvailability = teacherData.available_hours;
+    const bookingTimeInTeacherTz = moment(data.dateTime).tz(
+      teacherAvailability.timezone
+    );
+
+    const bookingTime = bookingTimeInTeacherTz.format("HH:mm");
+
+    // Handle overnight schedule (when end time is less than start time)
+    const isOvernight = teacherAvailability.end < teacherAvailability.start;
+
+    let isAvailable;
+    if (isOvernight) {
+      // For overnight schedule, time is available if it's after start OR before end
+      isAvailable =
+        moment(bookingTime, "HH:mm").isBetween(
+          moment(teacherAvailability.start, "HH:mm"),
+          moment("23:59", "HH:mm"),
+          "minute",
+          "[]"
+        ) ||
+        moment(bookingTime, "HH:mm").isBetween(
+          moment("00:00", "HH:mm"),
+          moment(teacherAvailability.end, "HH:mm"),
+          "minute",
+          "[]"
+        );
+    } else {
+      // Normal schedule (same day)
+      isAvailable = moment(bookingTime, "HH:mm").isBetween(
+        moment(teacherAvailability.start, "HH:mm"),
+        moment(teacherAvailability.end, "HH:mm"),
+        "minute",
+        "[]"
+      );
+    }
+
+    if (!isAvailable) {
+      // Convert teacher's hours to student's timezone for display
+      const studentTimezone = moment.tz.guess();
+      const availableStart = moment
+        .tz(teacherAvailability.start, "HH:mm", teacherAvailability.timezone)
+        .tz(studentTimezone)
+        .format("HH:mm");
+
+      const availableEnd = moment
+        .tz(teacherAvailability.end, "HH:mm", teacherAvailability.timezone)
+        .tz(studentTimezone)
+        .format("HH:mm");
+
+      toast({
+        title: <ToasterTitle title="Invalid Time" type="error" />,
+        description: `Teacher is only available from ${availableStart} to ${availableEnd} ${studentTimezone}${
+          isOvernight ? " (Overnight Schedule)" : ""
+        }`,
+      });
+      return;
+    }
+
     const startsAt = data.dateTime.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -126,7 +212,8 @@ const MessagingChannelFooter: React.FC = () => {
         durationInMins: 60,
         scheduledAt: data.dateTime.toISOString(),
         startsAt: startsAt,
-        status: "scheduled",
+        // status: "scheduled",
+        status: "pending_payment",
       })
       .select(`*`)
       .single();
@@ -162,38 +249,9 @@ const MessagingChannelFooter: React.FC = () => {
       await fetchExistingSession();
 
       setIsDialogOpen(false);
-
-      try {
-        const response = await fetch("/api/mockpayment/create-order", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sessionId: sessionData.id,
-          }),
-        });
-
-        const data = await response.json();
-        console.log(data, "Data");
-      } catch (error) {
-        console.error("Error creating PayPal order:", error);
-      }
-
       // need to remove if PayPal or other payment methods are implemented
-      setIsPlanDialogOpen(false);
-
-      toast({
-        title: <ToasterTitle title="Session Booked" type="success" />,
-        description: "Session has been booked successfully",
-      });
-      // router.push(
-      //   `/checkout?sessionId=${sessionData.id}&studentId=${sessionData.student_id}&teacherId=${sessionData.teacher_id}&amount=${sessionData.teacher?.[0]?.payment_details?.hourly_rate}`,
-      // );
-
-      // Paypal Implementation
       // try {
-      //   const response = await fetch("/api/paypal/payments/create-order", {
+      //   const response = await fetch("/api/mockpayment/create-order", {
       //     method: "POST",
       //     headers: {
       //       "Content-Type": "application/json",
@@ -204,17 +262,46 @@ const MessagingChannelFooter: React.FC = () => {
       //   });
 
       //   const data = await response.json();
-
-      //   if (data.approveUrl) {
-      //     window.location.href = data.approveUrl;
-      //     // Or if using Next.js router:
-      //     // router.push(data.approveUrl);
-      //   } else if (data.payerActionUrl) {
-      //     window.location.href = data.payerActionUrl;
-      //   }
+      //   console.log(data, "Data");
       // } catch (error) {
       //   console.error("Error creating PayPal order:", error);
       // }
+
+      // setIsPlanDialogOpen(false);
+
+      // toast({
+      //   title: <ToasterTitle title="Session Booked" type="success" />,
+      //   description: "Session has been booked successfully",
+      // });
+      // router.push(
+      //   `/checkout?sessionId=${sessionData.id}&studentId=${sessionData.student_id}&teacherId=${sessionData.teacher_id}&amount=${sessionData.teacher?.[0]?.payment_details?.hourly_rate}`,
+      // );
+      // till here
+
+      // Paypal Implementation
+      try {
+        const response = await fetch("/api/paypal/payments/create-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId: sessionData.id,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.approveUrl) {
+          window.location.href = data.approveUrl;
+          // Or if using Next.js router:
+          // router.push(data.approveUrl);
+        } else if (data.payerActionUrl) {
+          window.location.href = data.payerActionUrl;
+        }
+      } catch (error) {
+        console.error("Error creating PayPal order:", error);
+      }
     }
   };
 
@@ -224,51 +311,52 @@ const MessagingChannelFooter: React.FC = () => {
 
   //paypal implementation
 
-  // const paymentProcessed = useRef(false);
+  const paymentProcessed = useRef(false);
 
-  // useEffect(() => {
-  //   const { token, PayerID, payment, sessionId, teacherId, studentId } =
-  //     router.query;
+  useEffect(() => {
+    const { token, PayerID, payment, sessionId, teacherId, studentId } =
+      router.query;
 
-  //   if (token && PayerID && payment === "true" && !paymentProcessed.current) {
-  //     const handlePayment = async () => {
-  //       try {
-  //         paymentProcessed.current = true;
+    if (token && PayerID && payment === "true" && !paymentProcessed.current) {
+      const handlePayment = async () => {
+        try {
+          paymentProcessed.current = true;
 
-  //         const { success, data, error } = await capturePaypalPayment(
-  //           token as string,
-  //           sessionId as string,
-  //           teacherId as string,
-  //           studentId as string,
-  //         );
+          const { success, data, error } = await capturePaypalPayment(
+            token as string,
+            sessionId as string,
+            teacherId as string,
+            studentId as string
+          );
 
-  //         if (success) {
-  //           localStorage.setItem(`payment_${token}`, "captured");
+          if (success) {
+            localStorage.setItem(`payment_${token}`, "captured");
 
-  //           toast({
-  //             title: "Payment Successful!",
-  //             description: "Your payment has been processed successfully.",
-  //             variant: "default",
-  //           });
-  //           console.log(data, "Data");
-  //         } else {
-  //           toast({
-  //             title: "Payment Failed",
-  //             description:
-  //               typeof error === "string"
-  //                 ? error
-  //                 : "There was an error processing your payment.",
-  //             variant: "destructive",
-  //           });
-  //         }
-  //       } catch (error) {
-  //         console.error("Payment capture error:", error);
-  //       }
-  //     };
+            toast({
+              title: "Payment Successful!",
+              description: "Your payment has been processed successfully.",
+              variant: "default",
+            });
+            console.log(data, "Data");
+            window.history.replaceState(null, "", "/chat");
+          } else {
+            toast({
+              title: "Payment Failed",
+              description:
+                typeof error === "string"
+                  ? error
+                  : "There was an error processing your payment.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Payment capture error:", error);
+        }
+      };
 
-  //     handlePayment();
-  //   }
-  // }, [router.query]);
+      handlePayment();
+    }
+  }, [router.query]);
 
   return (
     <div className="flex min-h-[80px] items-center justify-between px-5">
@@ -291,7 +379,7 @@ const MessagingChannelFooter: React.FC = () => {
             <button
               onClick={() =>
                 router.push(
-                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`,
+                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`
                 )
               }
               className="flex h-9 items-center whitespace-nowrap rounded-full bg-primary-blue px-4 text-sm text-white"
@@ -332,7 +420,7 @@ const MessagingChannelFooter: React.FC = () => {
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!,
+                                existingSession?.scheduledAt!
                               ).toLocaleDateString()
                             : ""}
                         </span>
@@ -342,7 +430,7 @@ const MessagingChannelFooter: React.FC = () => {
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!,
+                                existingSession?.scheduledAt!
                               ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",

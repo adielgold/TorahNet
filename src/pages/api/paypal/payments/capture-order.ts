@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -40,7 +40,7 @@ export default async function handler(
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-      },
+      }
     );
 
     const paypalData = await response.json();
@@ -55,9 +55,23 @@ export default async function handler(
 
     // Only proceed with database updates if capture was successful
     if (paypalData.status === "COMPLETED") {
-      // Start a transaction for database updates
       const checkout = paypalData.purchase_units[0].payments.captures[0];
       try {
+        // First check if payment already exists
+        const { data: existingPayment } = await supabase
+          .from("payments")
+          .select("id")
+          .eq("payment_intent_id", checkout.id)
+          .single();
+
+        if (existingPayment) {
+          // Payment already processed, return success
+          return res.status(200).json({
+            success: true,
+            message: "Payment already processed",
+          });
+        }
+
         // Update session status
         const { data: updatedSession, error: updateError } = await supabase
           .from("sessions")
@@ -83,10 +97,12 @@ export default async function handler(
             status: "onhold",
             payout_due_date: new Date(
               new Date(sessionData.scheduledAt).getTime() +
-                7 * 24 * 60 * 60 * 1000,
+                7 * 24 * 60 * 60 * 1000
             ),
+            // status: "completed",
+            // payout_due_date: new Date(),
             teacher_amount: Number(
-              checkout.seller_receivable_breakdown.net_amount.value,
+              checkout.seller_receivable_breakdown.net_amount.value
             ),
           })
           .select();

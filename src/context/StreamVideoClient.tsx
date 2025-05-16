@@ -25,16 +25,24 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [token, setToken] = useState<string>("");
   const { user } = useUserStore();
+  const { toast } = useToast();
 
   const supabase = createClient();
-
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!user) return;
 
-    (async () => {
+    let currentClient: StreamVideoClient | null = null;
+
+    const initializeClient = async () => {
       try {
+        // If there's an existing client, disconnect it first
+        if (client) {
+          console.log("Disconnecting existing client");
+          await client.disconnectUser();
+          setClient(null);
+        }
+
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -48,19 +56,26 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         }
 
         const { data: axiosData } = await axios.get("/api/getStreamToken");
-
         setToken(axiosData?.token as string);
 
-        const client = new StreamVideoClient({
+        console.log("Initializing new Stream client for user:", user.id);
+        currentClient = new StreamVideoClient({
           apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY!,
-          user: { id: user?.id, name: user?.name!, image: user?.image_url! },
+          user: {
+            id: user?.id,
+            name: user?.name!,
+            image: user?.image_url!,
+            // Add a timestamp to help track client instances
+            custom: {
+              clientInitTime: new Date().toISOString(),
+            },
+          },
           token: axiosData?.token as string,
         });
 
-        setClient(client);
+        setClient(currentClient);
       } catch (error) {
         console.log(error, "Error from stream");
-
         toast({
           title: (
             <ToasterTitle
@@ -71,16 +86,23 @@ const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
           description: "Failed to get stream token",
         });
       }
-    })();
-
-    return () => {
-      if (client) {
-        client?.disconnectUser();
-        setClient(null);
-        setToken("");
-      }
     };
-  }, [user]);
+
+    initializeClient();
+
+    // Cleanup function that runs on unmount or before re-running effect
+    return () => {
+      console.log("Cleaning up Stream client connection");
+      if (currentClient) {
+        currentClient.disconnectUser();
+      }
+      if (client) {
+        client.disconnectUser();
+      }
+      setClient(null);
+      setToken("");
+    };
+  }, [user]); // Keep user as the only dependency
 
   return (
     <StreamContext.Provider value={{ client, setClient, token, setToken }}>
@@ -94,7 +116,7 @@ export const useStreamClient = () => {
 
   if (!streamContext) {
     throw new Error(
-      "useCurrentUser has to be used within <StreamContext.Provider>",
+      "useCurrentUser has to be used within <StreamContext.Provider>"
     );
   }
 

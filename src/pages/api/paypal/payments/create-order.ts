@@ -9,7 +9,7 @@ interface PayPalLink {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -42,7 +42,7 @@ export default async function handler(
         *,
         payment_details(*)
        )
-      `,
+      `
     )
     .eq("id", sessionId)
     .single();
@@ -71,19 +71,19 @@ export default async function handler(
   try {
     // saved for production
     // Calculate fees based on teacher's hourly rate
-    // const hourly_rate = sessionData?.teacher?.payment_details?.hourly_rate || 0;
-    // const productPrice = hourly_rate;
-    // const buyerFee = productPrice * 0.04 + 0.49; // 5% buyer fee
-    // const totalAmount = productPrice + buyerFee;
-    // const platformFee = productPrice * 0.04 + 0.49; // 5% platform fee
+    const hourly_rate = sessionData?.teacher?.payment_details?.hourly_rate || 0;
+    const platformFee = hourly_rate * 0.04 + 0.49; // 5% platform fee
+    const productPrice = hourly_rate + platformFee;
+    const buyerFee = productPrice * 0.04 + 0.49; // 5% buyer fee
+    const totalAmount = productPrice + buyerFee;
 
     const accessToken = await getPayPalAccessToken();
     //for dev
-    const hourly_rate = 20;
-    const productPrice = hourly_rate * 3;
-    const buyerFee = productPrice * 0.05;
-    const totalAmount = productPrice + buyerFee;
-    const platformFee = productPrice * 0.05;
+    // const hourly_rate = 20;
+    // const productPrice = hourly_rate * 3;
+    // const buyerFee = productPrice * 0.05;
+    // const totalAmount = productPrice + buyerFee;
+    // const platformFee = productPrice * 0.05;
 
     const customData = `${sessionId}|${sessionData.teacher_id}|${data.user.id}`;
     console.log("Create Order - Custom Data:", {
@@ -98,7 +98,7 @@ export default async function handler(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
-        "PayPal-Partner-Attribution-Id": `${process.env.PAYPAL_BN}`,
+        // "PayPal-Partner-Attribution-Id": `${process.env.PAYPAL_BN}`,
       },
       body: JSON.stringify({
         intent: "CAPTURE",
@@ -118,24 +118,24 @@ export default async function handler(
                 },
               },
             },
-            payee: {
-              merchant_id:
-                sessionData?.teacher?.payment_details?.stripe_account_id,
-            },
-            payment_instruction: {
-              disbursement_mode: "DELAYED",
-              platform_fees: [
-                {
-                  amount: {
-                    currency_code: "USD",
-                    value: platformFee.toFixed(2),
-                  },
-                  payee: {
-                    merchant_id: process.env.PAYPAL_ID,
-                  },
-                },
-              ],
-            },
+            // payee: {
+            //   merchant_id:
+            //     sessionData?.teacher?.payment_details?.stripe_account_id,
+            // },
+            // payment_instruction: {
+            //   disbursement_mode: "DELAYED",
+            //   platform_fees: [
+            //     {
+            //       amount: {
+            //         currency_code: "USD",
+            //         value: platformFee.toFixed(2),
+            //       },
+            //       payee: {
+            //         merchant_id: process.env.PAYPAL_ID,
+            //       },
+            //     },
+            //   ],
+            // },
             custom_id: customData,
             description: "Video call with ${sessionData.teacher.name}",
           },
@@ -171,7 +171,7 @@ export default async function handler(
     // }
 
     const payerActionUrl = orderData.links.find(
-      (link: PayPalLink) => link.rel === "payer-action",
+      (link: PayPalLink) => link.rel === "payer-action"
     )?.href;
 
     if (!payerActionUrl) {
