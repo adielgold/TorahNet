@@ -55,11 +55,11 @@ const MessagingChannelFooter: React.FC = () => {
   const unfiltredMembers = Object.values(channel.state.members || {});
 
   const members = Object.values(channel.state.members).filter(
-    (member) => member.user?.id !== client?.user?.id
+    (member) => member.user?.id !== client?.user?.id,
   );
 
   const onlineMembers = unfiltredMembers.filter(
-    (member) => member.user?.online
+    (member) => member.user?.online,
   );
 
   const supabase = createClient();
@@ -131,9 +131,9 @@ const MessagingChannelFooter: React.FC = () => {
     }
 
     // Convert booking time to teacher's timezone for comparison
-    const teacherAvailability = teacherData.available_hours;
+    const teacherAvailability = teacherData?.available_hours as any;
     const bookingTimeInTeacherTz = moment(data.dateTime).tz(
-      teacherAvailability.timezone
+      teacherAvailability.timezone,
     );
 
     const bookingTime = bookingTimeInTeacherTz.format("HH:mm");
@@ -149,13 +149,13 @@ const MessagingChannelFooter: React.FC = () => {
           moment(teacherAvailability.start, "HH:mm"),
           moment("23:59", "HH:mm"),
           "minute",
-          "[]"
+          "[]",
         ) ||
         moment(bookingTime, "HH:mm").isBetween(
           moment("00:00", "HH:mm"),
           moment(teacherAvailability.end, "HH:mm"),
           "minute",
-          "[]"
+          "[]",
         );
     } else {
       // Normal schedule (same day)
@@ -163,7 +163,7 @@ const MessagingChannelFooter: React.FC = () => {
         moment(teacherAvailability.start, "HH:mm"),
         moment(teacherAvailability.end, "HH:mm"),
         "minute",
-        "[]"
+        "[]",
       );
     }
 
@@ -326,7 +326,7 @@ const MessagingChannelFooter: React.FC = () => {
             token as string,
             sessionId as string,
             teacherId as string,
-            studentId as string
+            studentId as string,
           );
 
           if (success) {
@@ -379,7 +379,7 @@ const MessagingChannelFooter: React.FC = () => {
             <button
               onClick={() =>
                 router.push(
-                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`
+                  `/videoSession?sessionId=${existingSession?.id}&studentId=${existingSession?.student_id}&teacherId=${existingSession?.teacher_id}`,
                 )
               }
               className="flex h-9 items-center whitespace-nowrap rounded-full bg-primary-blue px-4 text-sm text-white"
@@ -420,7 +420,7 @@ const MessagingChannelFooter: React.FC = () => {
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!
+                                existingSession?.scheduledAt!,
                               ).toLocaleDateString()
                             : ""}
                         </span>
@@ -430,7 +430,7 @@ const MessagingChannelFooter: React.FC = () => {
                         <span className="text-lg font-medium text-gray-700">
                           {existingSession
                             ? new Date(
-                                existingSession?.scheduledAt!
+                                existingSession?.scheduledAt!,
                               ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",

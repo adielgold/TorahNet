@@ -116,11 +116,11 @@ const Settings = () => {
       setValue("paypal_email", paymentDetails?.stripe_account_id ?? "");
       setValue(
         "available_hours",
-        user?.available_hours ?? {
+        (user?.available_hours as any) ?? {
           start: "09:00",
           end: "17:00",
           timezone: "UTC",
-        }
+        },
       );
     }
     setSelectedTopics(user?.topics ?? []);
