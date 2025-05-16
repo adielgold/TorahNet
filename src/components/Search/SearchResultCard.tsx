@@ -24,6 +24,7 @@ const SearchResultCard = ({
   hourly_rate,
   image_url,
   index,
+  available_hours,
 }: SearchUserData & { index: number }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -50,9 +51,9 @@ const SearchResultCard = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 * (index % 4), duration: 0.5 }}
       >
-        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+        <Card className="transform overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
           <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="mb-4 flex items-center gap-4">
               <Avatar className="h-16 w-16 border-2 border-[#1e1e4a]">
                 <AvatarImage src={image_url!} alt={name!} />
                 <AvatarFallback>{name?.charAt(0)}</AvatarFallback>
@@ -60,12 +61,12 @@ const SearchResultCard = ({
               <div>
                 <h2 className="text-xl font-semibold text-[#1e1e4a]">{name}</h2>
                 <div className="flex items-center">
-                  <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                  <Star className="mr-1 h-4 w-4 text-yellow-400" />
                   <span className="text-sm text-gray-600">
                     {ratingData?.review_count > 0 ? (
                       <>
                         {ratingData?.average_score?.toFixed(2)}
-                        <span className="underline ml-1">
+                        <span className="ml-1 underline">
                           ({ratingData?.review_count} reviews)
                         </span>
                       </>
@@ -77,8 +78,8 @@ const SearchResultCard = ({
                 </div>
               </div>
             </div>
-            <p className="text-gray-600 mb-4 line-clamp-2">{bio}</p>
-            <div className="flex flex-wrap gap-2 mb-4">
+            <p className="mb-4 line-clamp-2 text-gray-600">{bio}</p>
+            <div className="mb-4 flex flex-wrap gap-2">
               {topics?.map((skill, index) => (
                 <Badge
                   key={index}
@@ -95,7 +96,7 @@ const SearchResultCard = ({
               </span>
               <Button
                 onClick={() => setIsOpen(true)}
-                className="bg-[#1e1e4a] hover:bg-[#2a2a5a] text-white transition-colors duration-300"
+                className="bg-[#1e1e4a] text-white transition-colors duration-300 hover:bg-[#2a2a5a]"
               >
                 View Profile
               </Button>
@@ -172,6 +173,7 @@ const SearchResultCard = ({
             image_url={image_url}
             handleClose={handleClose}
             ratingData={ratingData}
+            available_hours={available_hours}
           />
         </AnimatePresence>
       )}

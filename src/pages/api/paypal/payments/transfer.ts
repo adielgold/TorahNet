@@ -4,7 +4,7 @@ import { getPayPalAccessToken } from "@/lib/paypalAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -68,7 +68,7 @@ export default async function handler(
     // Calculate total available amount
     const totalPaymentSum = paymentsData.reduce(
       (sum, payment) => sum + payment.teacher_amount,
-      0,
+      0
     );
 
     console.log("Payment Calculation:", {

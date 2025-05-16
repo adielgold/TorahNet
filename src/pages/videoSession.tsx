@@ -50,8 +50,8 @@ const VideoSession = () => {
   const router = useRouter();
   const supabase = createClient();
 
-  console.log("User role:", user?.role);
-  console.log("Query params:", router.query);
+  // console.log("User role:", user?.role);
+  // console.log("Query params:", router.query);
 
   // Set session parameters from URL
   useEffect(() => {
@@ -97,7 +97,7 @@ const VideoSession = () => {
       } catch (err) {
         console.error("Exception in fetchSession:", err);
         setError(
-          `Exception: ${err instanceof Error ? err.message : String(err)}`,
+          `Exception: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     };
@@ -109,11 +109,27 @@ const VideoSession = () => {
   useEffect(() => {
     if (!videoClient || !sessionId) return;
 
+    let mounted = true; // Add mounted flag to prevent stale updates
+
     const initializeCall = async () => {
       try {
         console.log("Initializing video call for session:", sessionId);
         setLoading(true);
 
+        // First, leave any existing calls
+        const currentCalls = await videoClient.queryCalls();
+        if (currentCalls?.calls?.length > 0) {
+          await Promise.all(
+            currentCalls.calls.map(async (call) => {
+              if (call.id === sessionId) {
+                console.log("Leaving existing call before rejoining");
+                await call.leave();
+              }
+            })
+          );
+        }
+
+        // Get fresh call instance
         const calls = await videoClient.queryCalls({
           filter_conditions: {
             id: sessionId,
@@ -121,27 +137,43 @@ const VideoSession = () => {
           },
         });
 
-        console.log("Calls query result:", calls);
+        if (!mounted) return; // Check if component is still mounted
 
         if (calls?.calls?.length > 0) {
-          console.log("Found existing call, joining...");
-          await calls.calls[0].join();
-          setVideoCall(calls.calls[0]);
+          const call = calls.calls[0];
+          console.log("Joining call with ID:", call.id);
+
+          // Set call before joining to prevent race conditions
+          setVideoCall(call);
+          await call.join({ create: false });
         } else {
           console.log("No active call found for this session");
           setError("No active call found for this session");
         }
       } catch (err) {
         console.error("Error initializing video call:", err);
-        setError(
-          `Failed to initialize call: ${err instanceof Error ? err.message : String(err)}`,
-        );
+        if (mounted) {
+          setError(
+            `Failed to initialize call: ${err instanceof Error ? err.message : String(err)}`
+          );
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     initializeCall();
+
+    // Cleanup function
+    return () => {
+      mounted = false;
+      if (videoCall) {
+        console.log("Cleaning up call on unmount");
+        videoCall.leave();
+      }
+    };
   }, [videoClient, sessionId]);
 
   // Handle call events
@@ -189,13 +221,18 @@ const VideoSession = () => {
 
       const { data: paymentData, error: paymentError } = await supabase
         .from("payments")
-        .update({ status: "completed" })
-        .eq("session_id", sessionId);
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      console.log("Payment data:", { paymentData, paymentError });
 
       if (paymentError) {
         console.error("Error updating payment status:", paymentError);
       } else {
-        console.log("Payment marked as completed:", paymentData);
+        console.log("Latest payment:", paymentData);
       }
 
       setEndCallTrigger(true);
@@ -256,7 +293,7 @@ const VideoSession = () => {
         setTimeLeft(
           `${durationLeft.minutes()}:${
             durationLeft.seconds() < 10 ? "0" : ""
-          }${durationLeft.seconds()}`,
+          }${durationLeft.seconds()}`
         );
       }
     }, 1000);
@@ -385,19 +422,22 @@ export const MyUILayout: React.FC<{
         </div>
       </div>
       <SpeakerLayout participantsBarPosition="bottom" />
-      <CallControls />
+      <CallControls onLeave={endCall} />
     </StreamTheme>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { query } = context;
-
   const supabase = serverSidePropsClient(context);
 
+  console.log("Query params:", query);
+
   const { data, error } = await supabase.auth.getUser();
+  console.log("Auth check:", { userData: data, authError: error });
 
   if (error || !data) {
+    console.log("Redirecting: No authenticated user");
     return {
       redirect: {
         destination: "/login",
@@ -407,33 +447,48 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const sessionId = query?.sessionId as string;
+  console.log("Session ID:", sessionId);
 
   const { data: sessionData, error: sessionError } = await supabase
     .from("sessions")
     .select("*")
     .eq("id", sessionId)
     .single();
+  console.log("Session data:", { sessionData, sessionError });
 
   const { data: paymentData, error: paymentError } = await supabase
     .from("payments")
     .select("*")
     .eq("session_id", sessionId)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .single();
 
+  console.log("Payment data:", { paymentData, paymentError });
+
+  // Session statuses that should prevent access
   const sessionStatusesNotAllowed = [
     "finished",
     "cancelled",
-    "payment_pending",
+    "pending_payment",
   ];
+  // Payment statuses that should allow access
+  const validPaymentStatuses = ["completed", "onhold"];
 
-  const paymentStatusesNotAllowed = ["completed", "refunded"];
+  const redirectReason = sessionError
+    ? "Session error"
+    : !sessionData
+      ? "No session data"
+      : sessionStatusesNotAllowed.includes(sessionData?.status)
+        ? `Invalid session status: ${sessionData.status}`
+        : !paymentData
+          ? "No payment data"
+          : !validPaymentStatuses.includes(paymentData?.status)
+            ? `Invalid payment status: ${paymentData.status}`
+            : null;
 
-  if (
-    sessionError ||
-    paymentError ||
-    sessionStatusesNotAllowed.includes(sessionData?.status) ||
-    paymentStatusesNotAllowed.includes(paymentData?.status)
-  ) {
+  if (redirectReason) {
+    console.log("Redirecting to dashboard. Reason:", redirectReason);
     return {
       redirect: {
         destination: "/profile/dashboard",

@@ -14,12 +14,17 @@ import StepperButton from "./StepperButton";
 import ToasterTitle from "../ui/toaster-title";
 import { useToast } from "../ui/use-toast";
 
-const FinalStepDialog: React.FC<StepProps> = ({
+interface FinalStepDialogProps extends StepProps {
+  onRegistrationStart?: () => void;
+}
+
+const FinalStepDialog: React.FC<FinalStepDialogProps> = ({
   complete,
   currentStep,
   setComplete,
   setCurrentStep,
   steps,
+  onRegistrationStart,
 }) => {
   const router = useRouter();
 
@@ -46,6 +51,10 @@ const FinalStepDialog: React.FC<StepProps> = ({
   const { toast } = useToast();
 
   const registerUser = async () => {
+    if (onRegistrationStart) {
+      onRegistrationStart();
+    }
+
     setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({
@@ -86,7 +95,7 @@ const FinalStepDialog: React.FC<StepProps> = ({
       if (usersData) {
         try {
           const { data: streamData } = await axios.post(
-            "/api/registerStreamUser",
+            "/api/registerStreamUser"
           );
 
           if (usersData?.role === "teacher") {
@@ -170,7 +179,7 @@ const FinalStepDialog: React.FC<StepProps> = ({
     //           Welcome, Dolor Sit Amet!
     //         </p>
     //         <p className="text-md text-darkblueui text-center">
-    //           Amazing! Let’s start to check out your dashboard and guide you
+    //           Amazing! Let's start to check out your dashboard and guide you
     //           through the app.
     //         </p>
     //       </div>

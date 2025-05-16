@@ -15,7 +15,7 @@ export async function getPayPalAccessToken(merchantId?: string) {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization: `Basic ${authString}`,
-      "PayPal-Partner-Attribution-Id": `${process.env.PAYPAL_BN}`,
+      // "PayPal-Partner-Attribution-Id": `${process.env.PAYPAL_BN}`,
     },
     body: `grant_type=client_credentials${scope}`,
   });

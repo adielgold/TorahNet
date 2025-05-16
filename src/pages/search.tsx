@@ -133,7 +133,7 @@ const Search = () => {
       endRating,
     });
 
-    setUsers(data);
+    setUsers(data as SearchUserData[]);
   };
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -221,7 +221,7 @@ const Search = () => {
         startRating: (router.query?.starting_rating as string) || "",
         endRating: (router.query?.ending_rating as string) || "",
       });
-      setUsers(data);
+      setUsers(data as SearchUserData[]);
     })();
   }, [router.isReady, router.query]);
 

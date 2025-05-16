@@ -39,7 +39,10 @@ export default function App({ Component, pageProps }: AppProps) {
       {/* <PayPalScriptProvider
         options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID! }}
       > */}
-      <main className={`m-auto flex w-full flex-col ${poppins.className}`}>
+      <main
+        className={`m-auto flex w-full flex-col ${poppins.className}`}
+        suppressHydrationWarning
+      >
         <Toaster />
         <ShadcnToaster />
         <ClientWrapper>

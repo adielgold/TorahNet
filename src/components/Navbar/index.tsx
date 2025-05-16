@@ -80,11 +80,11 @@ export default function NavbarWrapper({
             label: "Session History",
             href: "/profile/session-history",
           },
-          // {
-          //   icon: CreditCard,
-          //   label: "Payment History",
-          //   href: "/profile/payment-history",
-          // },
+          {
+            icon: CreditCard,
+            label: "Payment History",
+            href: "/profile/payment-history",
+          },
           { icon: Settings, label: "Settings", href: "/profile/settings" },
         ];
 
