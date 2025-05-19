@@ -558,7 +558,7 @@ const Settings = () => {
                     )}
                 </div>
                 <p className="text-sm text-gray-500">
-                  We charge a 15% commission to keep our platform running. This
+                  We charge a 7.5% commission to keep our platform running. This
                   means the end user pays ${paymentDetails?.hourly_rate!}, you
                   get ${Math.round(paymentDetails?.hourly_rate! * 0.85)} per
                   hour.

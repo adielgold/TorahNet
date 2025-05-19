@@ -15,11 +15,11 @@ export default function FAQ() {
       answer:
         "Our teachers are primarily ultra-Orthodox Jews who possess extensive knowledge of Jewish traditions, texts, and values. They bring their expertise to a global audience, sharing wisdom that inspires personal and spiritual growth.",
     },
-    {
-      question: "Who can use TorahNet as a student?",
-      answer:
-        "TorahNet is open to everyone interested in exploring Jewish wisdom - secular Jews reconnecting with their heritage, non-Jewish individuals seeking insights into Judaism, and anyone passionate about self-growth through Jewish teachings.",
-    },
+    // {
+    //   question: "Who can use TorahNet as a student?",
+    //   answer:
+    //     "TorahNet is open to everyone interested in exploring Jewish wisdom - secular Jews reconnecting with their heritage, non-Jewish individuals seeking insights into Judaism, and anyone passionate about self-growth through Jewish teachings.",
+    // },
     {
       question: "What topics can I learn on TorahNet?",
       answer:
@@ -33,7 +33,7 @@ export default function FAQ() {
     {
       question: "How do I join as a teacher on TorahNet?",
       answer:
-        "If you're interested in teaching on TorahNet, visit our website and sign up as a teacher. After registering, go to your settings to set up your Stripe account, enabling you to manage your payments seamlessly. Once completed, you're all set to start teaching on TorahNet!",
+        "If you're interested in teaching on TorahNet, visit our website and sign up as a teacher. After registering, go to your settings to set up your PayPal account so we can send you your earnings. Payments are processed at the end of each month. Once your account is set up, you're all set to start teaching on TorahNet!",
     },
     {
       question: "What tools does TorahNet provide for learning and teaching?",
