@@ -397,7 +397,9 @@ const Settings = () => {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h1 className="mb-2 text-3xl font-bold">{user?.name}</h1>
-                <h1 className="mb-2 text-sm text-gray-600">{user?.bio}</h1>
+                <p className="mb-4 max-w-xl whitespace-pre-wrap break-words text-sm text-gray-600">
+                  {user?.bio}
+                </p>
                 <p className="mb-4 text-gray-600">{user?.expertise}</p>
                 <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
                   {selectedTopics?.map((topic, index) => (
@@ -515,7 +517,7 @@ const Settings = () => {
                   />
                 </div>
                 <div>
-                  {!paymentDetails?.stripe_account_id &&
+                  {/* {!paymentDetails?.stripe_account_id &&
                   !paymentDetails?.onboarding_completed ? (
                     <ValidateInput
                       control={control}
@@ -533,17 +535,17 @@ const Settings = () => {
                       {paymentDetails?.disabled_reason?.split(".")?.[1]} Reason.
                       Please contact support
                     </p>
-                  )}
+                  )} */}
 
-                  {paymentDetails?.stripe_account_id &&
+                  {/* {paymentDetails?.stripe_account_id &&
                   !paymentDetails?.onboarding_completed &&
                   !paymentDetails?.disabled_reason ? (
                     <p className="mt-1.5 text-xs font-medium text-red-500">
                       Your account is under review
                     </p>
-                  ) : null}
+                  ) : null} */}
 
-                  {paymentDetails?.stripe_account_id &&
+                  {/* {paymentDetails?.stripe_account_id &&
                     paymentDetails?.onboarding_completed &&
                     !paymentDetails?.disabled_reason && (
                       <ValidateInput
@@ -555,7 +557,17 @@ const Settings = () => {
                         type="email"
                         disabled={!isEditing}
                       />
-                    )}
+                    )} */}
+
+                  <ValidateInput
+                    control={control}
+                    name="paypal_email"
+                    placeholder="abc@xyz.com"
+                    rules={{}}
+                    label="Paypal Email"
+                    type="email"
+                    disabled={!isEditing}
+                  />
                 </div>
                 <p className="text-sm text-gray-500">
                   We charge a 7.5% commission to keep our platform running. This

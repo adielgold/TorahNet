@@ -1,15 +1,9 @@
-import React from "react";
-import LayoutWrapper from "@/components/Layout";
+import dynamic from "next/dynamic";
 
+const Users = dynamic(() => import("@/components/admin/users/UserManagement"), {
+  ssr: false,
+});
 
-const Users = () => {
-
-    return (
-        <LayoutWrapper>
-            <div>
-                Users - not implemented yet
-            </div>
-        </LayoutWrapper>
-    )
-};
-export default Users;
+export default function Page() {
+  return <Users />;
+}
