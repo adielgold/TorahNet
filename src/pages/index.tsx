@@ -55,9 +55,9 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <main className="mx-auto w-full">
-        <div className="mx-auto w-full px-4">
+        {/* <div className="mx-auto w-full px-4">
           <ImportantUpdateAlert />
-        </div>
+        </div> */}
         <section className="container mx-auto flex flex-col items-center gap-8 px-4 py-16 md:flex-row md:pb-24">
           {/* Text and CTA Section */}
           <motion.div
@@ -348,7 +348,7 @@ export default function Home() {
                   Step 5
                 </h3>
                 <p className="mb-4 text-xl font-bold text-blue-900">
-                  Pay securely via Stripe
+                  Pay securely via PayPal
                 </p>
                 <div className="absolute right-[-30px] top-1/2 hidden -translate-y-1/2 transform md:block">
                   <div className="h-1 w-12 bg-blue-500"></div>
