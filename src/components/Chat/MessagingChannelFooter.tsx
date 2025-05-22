@@ -51,6 +51,10 @@ const MessagingChannelFooter: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
+  const [teacherHourlyRate, setTeacherHourlyRate] = useState<number | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
 
   const unfiltredMembers = Object.values(channel.state.members || {});
 
@@ -67,6 +71,34 @@ const MessagingChannelFooter: React.FC = () => {
   const { user } = useUserStore();
 
   const { client: streamClient } = useStreamClient();
+
+  const fetchTeacherHourlyRate = async () => {
+    setIsLoading(true);
+    const teacherId =
+      user?.role === "teacher" ? user?.id : members?.[0]?.user?.id;
+
+    if (!teacherId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("payment_details")
+      .select("hourly_rate")
+      .eq("id", teacherId)
+      .single();
+
+    console.log(data, "Data");
+
+    if (error) {
+      console.error("Error fetching hourly rate:", error);
+      setTeacherHourlyRate(0);
+    } else {
+      setTeacherHourlyRate(data?.hourly_rate || 0);
+    }
+
+    setIsLoading(false);
+  };
 
   const fetchExistingSession = async () => {
     const now = new Date();
@@ -307,6 +339,7 @@ const MessagingChannelFooter: React.FC = () => {
 
   useEffect(() => {
     fetchExistingSession();
+    fetchTeacherHourlyRate();
   }, []);
 
   //paypal implementation
@@ -458,11 +491,26 @@ const MessagingChannelFooter: React.FC = () => {
         </div>
       ) : (
         <button
-          onClick={() => setIsPlanDialogOpen(!isPlanDialogOpen)}
-          className="flex h-9 items-center whitespace-nowrap rounded-full bg-darkblueui px-4 text-sm text-white"
+          onClick={() => {
+            if (teacherHourlyRate && teacherHourlyRate > 0) {
+              setIsPlanDialogOpen(!isPlanDialogOpen);
+            }
+          }}
+          disabled={isLoading || !teacherHourlyRate || teacherHourlyRate === 0}
+          className={`flex h-9 items-center whitespace-nowrap rounded-full px-4 text-sm ${
+            isLoading
+              ? "cursor-wait bg-gray-300 text-gray-500"
+              : teacherHourlyRate && teacherHourlyRate > 0
+                ? "cursor-pointer bg-darkblueui text-white"
+                : "cursor-not-allowed bg-gray-300 text-gray-500 opacity-60"
+          }`}
         >
           <FaUser className="mr-2" />
-          Plan Meeting
+          {isLoading
+            ? "Loading..."
+            : teacherHourlyRate === 0
+              ? "Unavailable"
+              : "Plan Meeting"}
         </button>
       )}
 
