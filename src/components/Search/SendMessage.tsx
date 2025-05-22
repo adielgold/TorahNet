@@ -187,7 +187,7 @@ const SendMessage = ({
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="mb-4">
+        <div className="mb-4 max-h-[200px] overflow-y-auto">
           <h3 className="mb-2 text-lg font-semibold text-[#1e1e4a]">
             Biography
           </h3>

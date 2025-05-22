@@ -9,7 +9,7 @@ interface PayPalLink {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -42,7 +42,7 @@ export default async function handler(
         *,
         payment_details(*)
        )
-      `
+      `,
     )
     .eq("id", sessionId)
     .single();
@@ -72,9 +72,9 @@ export default async function handler(
     // saved for production
     // Calculate fees based on teacher's hourly rate
     const hourly_rate = sessionData?.teacher?.payment_details?.hourly_rate || 0;
-    const platformFee = hourly_rate * 0.04 + 0.49; // 5% platform fee
+    const platformFee = hourly_rate * 0.075 + 0.49; // 7.5% platform fee
     const productPrice = hourly_rate + platformFee;
-    const buyerFee = productPrice * 0.04 + 0.49; // 5% buyer fee
+    const buyerFee = productPrice * 0.075 + 0.49; // 7.5% buyer fee
     const totalAmount = productPrice + buyerFee;
 
     const accessToken = await getPayPalAccessToken();
@@ -171,7 +171,7 @@ export default async function handler(
     // }
 
     const payerActionUrl = orderData.links.find(
-      (link: PayPalLink) => link.rel === "payer-action"
+      (link: PayPalLink) => link.rel === "payer-action",
     )?.href;
 
     if (!payerActionUrl) {
